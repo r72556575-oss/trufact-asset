@@ -1,71 +1,55 @@
 name: daily-short
+
 on:
   schedule:
-    - cron: "30 6 * * *"
+    - cron: "30 14 * * *"      # 20:00 IST every day; video goes public 07:00 IST next morning
   workflow_dispatch:
     inputs:
-      topic:
-        description: "Optional topic override"
-        required: false
-        default: ""
-      dry_run:
-        description: "1 = build only, no upload"
-        required: false
-        default: "0"
-concurrency: { group: daily-short, cancel-in-progress: false }
+      skip_upload:
+        description: "Test run: build the video but do NOT upload"
+        type: boolean
+        default: false
+
 permissions:
   contents: write
+
+concurrency:
+  group: daily-short
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
-    defaults:
-      run:
-        working-directory: trufact-auto
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Unpack zip
-        working-directory: ${{ github.workspace }}
-        run: ls -la && unzip -q -o 1.zip && ls
-      - uses: actions/setup-node@v4
-        with: { node-version: "22" }
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
+
       - name: System packages
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-freefont-ttf
-      - run: pip install -r requirements.txt
-      - name: Playwright Chromium
         run: |
-          npm install -g playwright@1.49.1
-          playwright install --with-deps chromium
-      - name: Unit tests
-        run: python3 tests/run_plain.py tests.test_audio_timing tests.test_post tests.test_sound
-      - name: Build + upload the Short
+          sudo apt-get update -y
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Python packages
+        run: pip install -r requirements.txt
+
+      - name: Make the video and schedule it
+        shell: bash
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
-          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
-          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
-          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          UPLOAD_BACKEND: ${{ vars.UPLOAD_BACKEND || 'zapier' }}
-          PRIVACY_MODE: ${{ vars.PRIVACY_MODE || 'schedule' }}
-          TOPIC_OVERRIDE: ${{ github.event.inputs.topic }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || '0' }}
-        run: python3 -m pipeline.run
-      - name: Save the topic history
-        if: ${{ github.event.inputs.dry_run != '1' }}
-        working-directory: .
-        run: |
-          git config user.name "trufact-bot"; git config user.email "bot@users.noreply.github.com"
-          git add trufact-auto/history/topics.json && git commit -m "history: new topic" || echo "nothing to commit"
-          git push || true
-      - uses: actions/upload-artifact@v4
+          ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
+        run: python -u generate.py 2>&1 | tee run.log
+
+      - name: Save log and topic history
         if: always()
-        with:
-          name: short-${{ github.run_id }}
-          path: |
-            trufact-auto/out/
-            trufact-auto/work/project/work/test_frames/
-          retention-days: 14
+        run: |
+          git config user.name "trufact-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add history.json run.log
+          git diff --cached --quiet || (git commit -m "run log and topic history" && git pull --rebase -q && git push)
