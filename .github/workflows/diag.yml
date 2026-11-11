@@ -1,0 +1,22 @@
+name: diag
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests -q
+      - name: Probe Gemini key
+        shell: bash
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -u diag.py 2>&1 | tee diag.log
+      - if: always()
+        run: |
+          git config user.name "trufact-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add diag.log
+          git diff --cached --quiet || (git commit -m "diag log" && git pull --rebase -q && git push)
