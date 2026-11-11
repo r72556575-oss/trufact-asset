@@ -1,31 +1,30 @@
-candidate reply: [   "Erfurt latrine disaster",   "London Beer Flood",   "Great Molasses Flood",   "Operation Mincemeat",   "Dancing plague of 1518",   "Incident at Petrich",   "Athletics at the 1904 Summer Olympics – Men's marathon",   "Battle of Karánsebes" ]
-  candidate 'Erfurt latrine disaster' -> 'Erfurt latrine disaster', 4098 chars
-topic: Erfurt latrine disaster | extract chars: 4098
-TITLE: The Bizarre Erfurt Disaster of 1184
-  speech 39.7s, total video 45.0s
+candidate reply: [   "London Beer Flood",   "Erfurt latrine disaster",   "Dancing plague of 1518",   "Cadaver Synod",   "Operation Mincemeat",   "Emu War",   "Wojtek (bear)",   "Great Molasses Flood" ]
+  candidate 'London Beer Flood' -> 'London Beer Flood', 8564 chars
+topic: London Beer Flood | extract chars: 8564
+TITLE: The Bizarre 1814 London Beer Flood
+  [gemini-3.1-flash-tts-preview] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
+  speech 36.2s, total video 42.1s
   [gemini-2.5-flash-image] HTTP 429: {
   "error": {
     "code": 429,
     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
   gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
   image 1: pollinations
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  image 2: using fallback card
-  pollinations HTTP 402, 322 bytes
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
   image 3: pollinations
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  image 4: using fallback card
-  pollinations HTTP 402, 322 bytes
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
   image 5: pollinations
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  pollinations HTTP 402, 323 bytes
-  image 6: using fallback card
-  pollinations HTTP 402, 322 bytes
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
   image 7: pollinations
 rendered out/short.mp4
 upload skipped
