@@ -49,6 +49,7 @@ def gemini(model, body, tries=5):
         if r is not None:
             log(f"  [{model}] HTTP {r.status_code}: {r.text[:300]}")
             if r.status_code in (400, 401, 403, 404): break          # not retryable
+            if r.status_code == 429 and 'PerDay' in r.text: break    # daily quota is gone: retrying is pointless
         time.sleep(wait); wait = min(wait * 2, 120)
     raise RuntimeError(f"Gemini call failed: {model}")
 
@@ -69,22 +70,39 @@ def load_history():
     try: return json.load(open(HIST))
     except Exception: return {"topics": []}
 
+def wiki_extract(title):
+    try:
+        r = requests.get("https://en.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": 1, "exchars": 9000,
+                         "redirects": 1, "titles": title, "format": "json"}, headers={"User-Agent": "TruFactBot/1.0 (educational shorts)"}, timeout=30)
+        pg = list(r.json()["query"]["pages"].values())[0]; ex = pg.get("extract", "") or ""
+        if "may refer to" in ex[:400]: return None, None
+        return pg.get("title", title), ex
+    except Exception as e:
+        log("  wiki error:", e); return None, None
+
 def make_script(hist):
     today = datetime.date.today()
     cat = CATEGORIES[today.toordinal() % len(CATEGORIES)]
     used = [t["title"] for t in hist["topics"][-80:]]
     if OFFLINE: return offline_script()
-    # step A: research with Google Search grounding (verifies the fact)
-    research = text_of(gemini(TEXT_MODEL, {
-        "contents": [{"parts": [{"text":
-            f"Pick ONE surprising but TRUE fact in the category '{cat}' that would amaze a general audience. "
-            f"Do not repeat these already used topics: {used}. Use Google Search to verify it from reliable sources. "
-            "Return: the topic, then 6-8 verified key points with exact numbers/years, and what is commonly misunderstood. "
-            "If a point is disputed or uncertain, leave it out."}]}],
-        "tools": [{"google_search": {}}]}))
-    log("research:", research[:400].replace("\n", " "), "...")
+    # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
+    title, extract = None, None
+    cj = text_of(gemini(TEXT_MODEL, {"contents": [{"parts": [{"text":
+        f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
+        f"each good for an amazing 45-second story. Do not use these used topics: {used}. "
+        "Return a JSON list of exact Wikipedia article titles (strings) only."}]}],
+        "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}}))
+    try: cands = json.loads(re.sub(r"^```json|```$", "", cj.strip(), flags=re.M).strip())
+    except Exception: cands = []
+    for t in cands:
+        title, extract = wiki_extract(str(t))
+        if extract and len(extract) >= 1500: break
+        title, extract = None, None
+    if not extract: raise RuntimeError("no usable Wikipedia topic found")
+    research = f"Wikipedia article '{title}':\n{extract[:7500]}"
+    log("topic:", title, "| extract chars:", len(extract))
     prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}.
-Use ONLY these verified facts:
+Use ONLY facts that are stated in this source text (do not add outside facts):
 {research}
 
 Return JSON with this exact shape:
@@ -100,7 +118,7 @@ Rules:
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
 - "image_prompt": a vivid scene for a vertical 2D cartoon illustration of that beat (what is visible, who/what, action, setting). No text, no logos, no real people, no violence.
 - "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
-- Be accurate. Never invent facts that are not in the verified list."""
+- Be accurate. Never invent facts that are not in the source text."""
     last = None
     for attempt in range(3):
         resp = gemini(TEXT_MODEL, {"contents": [{"parts": [{"text": prompt}]}],
@@ -218,18 +236,42 @@ STYLE = ("Flat 2D cartoon illustration, thick black ink outlines, bright saturat
          "friendly expressive characters, vertical 9:16 composition, subject centred in the upper two thirds, "
          "no text, no letters, no watermark, no logo. Scene: ")
 
-def get_image(prompt, i):
-    if OFFLINE or not GKEY: return card(f"{i+1}", "", i)
-    for attempt in range(2):
+IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
+_gemini_img_ok = True
+
+def pollinations(prompt):
+    import io, urllib.parse
+    q = urllib.parse.quote((STYLE + prompt)[:700])
+    for k in range(3):
         try:
-            resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": STYLE + prompt}]}],
-                          "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "9:16"}}}, tries=3)
-            raw, _ = inline_of(resp)
-            if raw:
-                import io
-                return Image.open(io.BytesIO(raw)).convert("RGB")
+            r = requests.get(f"https://image.pollinations.ai/prompt/{q}", params={"width": 768, "height": 1344, "nologo": "true", "model": "flux",
+                             "seed": random.randint(1, 10 ** 6)}, timeout=150)
+            if r.status_code == 200 and r.headers.get("content-type", "").startswith("image") and len(r.content) > 8000:
+                return Image.open(io.BytesIO(r.content)).convert("RGB")
+            log(f"  pollinations HTTP {r.status_code}, {len(r.content)} bytes")
         except Exception as e:
-            log(f"  image {i+1} attempt {attempt+1} failed: {e}")
+            log("  pollinations error:", e)
+        time.sleep(10)
+    return None
+
+def get_image(prompt, i):
+    global _gemini_img_ok
+    if OFFLINE or not GKEY: return card(f"{i+1}", "", i)
+    for prov in IMG_PROVIDERS:
+        if prov == "gemini" and _gemini_img_ok:
+            try:
+                resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": STYLE + prompt}]}],
+                              "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "9:16"}}}, tries=1)
+                raw, _ = inline_of(resp)
+                if raw:
+                    import io
+                    log(f"  image {i+1}: gemini"); return Image.open(io.BytesIO(raw)).convert("RGB")
+            except Exception as e:
+                log(f"  gemini image unavailable ({e}); not trying it again this run"); _gemini_img_ok = False
+        elif prov == "pollinations":
+            im = pollinations(prompt)
+            if im is not None:
+                log(f"  image {i+1}: pollinations"); time.sleep(2); return im
     log(f"  image {i+1}: using fallback card")
     return card(f"{i+1}", "", i)
 
