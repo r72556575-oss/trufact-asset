@@ -243,19 +243,25 @@ STYLE = ("Flat 2D cartoon illustration, thick black ink outlines, bright saturat
 IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
 _gemini_img_ok = True
 
+_last_poll = [0.0]
+
 def pollinations(prompt):
+    """Free anonymous service: it answers HTTP 402/429 if called too often, so keep >=35 s between requests."""
     import io, urllib.parse
     q = urllib.parse.quote((STYLE + prompt)[:700])
-    for k in range(3):
+    for k in range(6):
+        wait = 36 - (time.time() - _last_poll[0])
+        if wait > 0: time.sleep(wait)
+        _last_poll[0] = time.time()
         try:
             r = requests.get(f"https://image.pollinations.ai/prompt/{q}", params={"width": 768, "height": 1344, "nologo": "true", "model": "flux",
                              "seed": random.randint(1, 10 ** 6)}, timeout=150)
+            _last_poll[0] = time.time()
             if r.status_code == 200 and r.headers.get("content-type", "").startswith("image") and len(r.content) > 8000:
                 return Image.open(io.BytesIO(r.content)).convert("RGB")
-            log(f"  pollinations HTTP {r.status_code}, {len(r.content)} bytes")
+            log(f"  pollinations HTTP {r.status_code}, {len(r.content)} bytes (try {k+1})")
         except Exception as e:
             log("  pollinations error:", e)
-        time.sleep(10)
     return None
 
 def get_image(prompt, i):
@@ -275,7 +281,7 @@ def get_image(prompt, i):
         elif prov == "pollinations":
             im = pollinations(prompt)
             if im is not None:
-                log(f"  image {i+1}: pollinations"); time.sleep(2); return im
+                log(f"  image {i+1}: pollinations"); return im
     log(f"  image {i+1}: using fallback card")
     return card(f"{i+1}", "", i)
 
