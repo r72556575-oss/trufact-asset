@@ -1,37 +1,10 @@
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ",
-    "status": 
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ",
-    "status": 
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ",
-    "status": 
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ",
-    "status": 
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ",
-    "status": 
 Traceback (most recent call last):
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 476, in <module>
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 518, in <module>
     main()
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 438, in main
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 480, in main
     hist = load_history(); script = make_script(hist)
                                     ^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 78, in make_script
-    research = text_of(gemini(TEXT_MODEL, {
-                       ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 53, in gemini
-    raise RuntimeError(f"Gemini call failed: {model}")
-RuntimeError: Gemini call failed: gemini-flash-latest
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 101, in make_script
+    if not extract: raise RuntimeError("no usable Wikipedia topic found")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: no usable Wikipedia topic found
