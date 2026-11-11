@@ -72,7 +72,7 @@ def load_history():
 
 def wiki_extract(title):
     try:
-        r = requests.get("https://en.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": 1, "exchars": 9000,
+        r = requests.get("https://en.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": 1, "exsectionformat": "plain",
                          "redirects": 1, "titles": title, "format": "json"}, headers={"User-Agent": "TruFactBot/1.0 (educational shorts)"}, timeout=30)
         pg = list(r.json()["query"]["pages"].values())[0]; ex = pg.get("extract", "") or ""
         if "may refer to" in ex[:400]: return None, None
@@ -92,10 +92,14 @@ def make_script(hist):
         f"each good for an amazing 45-second story. Do not use these used topics: {used}. "
         "Return a JSON list of exact Wikipedia article titles (strings) only."}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}}))
+    log("candidate reply:", cj[:300].replace("\n", " "))
     try: cands = json.loads(re.sub(r"^```json|```$", "", cj.strip(), flags=re.M).strip())
-    except Exception: cands = []
+    except Exception as e: log("  candidate JSON error:", e); cands = []
+    if isinstance(cands, dict): cands = next((v for v in cands.values() if isinstance(v, list)), [])
     for t in cands:
+        t = t if isinstance(t, str) else (t.get("title") if isinstance(t, dict) else str(t))
         title, extract = wiki_extract(str(t))
+        log(f"  candidate {t!r} -> {title!r}, {len(extract or '')} chars")
         if extract and len(extract) >= 1500: break
         title, extract = None, None
     if not extract: raise RuntimeError("no usable Wikipedia topic found")
