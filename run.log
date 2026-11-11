@@ -1,10 +1,31 @@
-Traceback (most recent call last):
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 518, in <module>
-    main()
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 480, in main
-    hist = load_history(); script = make_script(hist)
-                                    ^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 101, in make_script
-    if not extract: raise RuntimeError("no usable Wikipedia topic found")
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-RuntimeError: no usable Wikipedia topic found
+candidate reply: [   "Erfurt latrine disaster",   "London Beer Flood",   "Great Molasses Flood",   "Operation Mincemeat",   "Dancing plague of 1518",   "Incident at Petrich",   "Athletics at the 1904 Summer Olympics – Men's marathon",   "Battle of Karánsebes" ]
+  candidate 'Erfurt latrine disaster' -> 'Erfurt latrine disaster', 4098 chars
+topic: Erfurt latrine disaster | extract chars: 4098
+TITLE: The Bizarre Erfurt Disaster of 1184
+  speech 39.7s, total video 45.0s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  image 2: using fallback card
+  pollinations HTTP 402, 322 bytes
+  image 3: pollinations
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  image 4: using fallback card
+  pollinations HTTP 402, 322 bytes
+  image 5: pollinations
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  pollinations HTTP 402, 323 bytes
+  image 6: using fallback card
+  pollinations HTTP 402, 322 bytes
+  image 7: pollinations
+rendered out/short.mp4
+upload skipped
