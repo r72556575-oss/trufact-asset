@@ -17,7 +17,7 @@ OFFLINE = os.environ.get("OFFLINE_TEST") == "1"          # local test mode: no n
 OUT = os.environ.get("OUT_DIR", "out")
 HIST = "history.json"
 GKEY = os.environ.get("GEMINI_API_KEY", "")
-TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-flash-latest")
+TEXT_MODELS = [os.environ.get("GEMINI_TEXT_MODEL", "gemini-flash-latest"), "gemini-3-flash-preview", "gemini-flash-lite-latest", "gemini-2.5-flash"]
 TTS_MODELS = [os.environ.get("GEMINI_TTS_MODEL", "gemini-3.1-flash-tts-preview"), "gemini-2.5-flash-preview-tts"]
 IMG_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
 VOICE = os.environ.get("GEMINI_VOICE", "Puck")           # boy voice
@@ -41,7 +41,7 @@ def gemini(model, body, tries=5):
     wait = 15
     for k in range(tries):
         try:
-            r = requests.post(url, headers={"x-goog-api-key": GKEY, "Content-Type": "application/json"}, json=body, timeout=240)
+            r = requests.post(url, headers={"x-goog-api-key": GKEY, "Content-Type": "application/json"}, json=body, timeout=120)
         except requests.RequestException as e:
             log(f"  [{model}] network error: {e}"); r = None
         if r is not None and r.status_code == 200:
@@ -52,6 +52,14 @@ def gemini(model, body, tries=5):
             if r.status_code == 429 and 'PerDay' in r.text: break    # daily quota is gone: retrying is pointless
         time.sleep(wait); wait = min(wait * 2, 120)
     raise RuntimeError(f"Gemini call failed: {model}")
+
+def gemini_text(body):
+    """try several text models in turn (503 'high demand' on one model is common)"""
+    last = None
+    for m in TEXT_MODELS:
+        try: return gemini(m, body, tries=3)
+        except Exception as e: last = e; log(f"  text model {m} unavailable, trying next")
+    raise RuntimeError(f"all text models failed: {last}")
 
 def parts_of(resp):
     try: return resp["candidates"][0]["content"]["parts"]
@@ -87,7 +95,7 @@ def make_script(hist):
     if OFFLINE: return offline_script()
     # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
     title, extract = None, None
-    cj = text_of(gemini(TEXT_MODEL, {"contents": [{"parts": [{"text":
+    cj = text_of(gemini_text({"contents": [{"parts": [{"text":
         f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
         f"each good for an amazing 45-second story. Do not use these used topics: {used}. "
         "Return a JSON list of exact Wikipedia article titles (strings) only."}]}],
@@ -125,7 +133,7 @@ Rules:
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
     for attempt in range(3):
-        resp = gemini(TEXT_MODEL, {"contents": [{"parts": [{"text": prompt}]}],
+        resp = gemini_text({"contents": [{"parts": [{"text": prompt}]}],
                                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8}})
         try:
             s = json.loads(re.sub(r"^```json|```$", "", text_of(resp).strip(), flags=re.M).strip())
