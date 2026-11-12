@@ -49,7 +49,13 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
           PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
-        run: python -u generate.py 2>&1 | tee run.log
+        run: |
+          ok=0
+          for i in 1 2 3; do
+            if python -u generate.py 2>&1 | tee -a run.log; then ok=1; break; fi
+            echo "attempt $i failed, retrying in 120 s" | tee -a run.log; sleep 120
+          done
+          test "$ok" = 1
 
       - name: Save log, preview and topic history
         if: always()
