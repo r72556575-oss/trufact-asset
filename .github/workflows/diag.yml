@@ -8,11 +8,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - run: pip install requests -q
-      - name: Probe Gemini key
+      - run: pip install requests fastmcp -q
+      - name: Probe Zapier MCP
         shell: bash
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
         run: python -u diag.py 2>&1 | tee diag.log
       - if: always()
         run: |
