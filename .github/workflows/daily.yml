@@ -9,6 +9,10 @@ on:
         description: "Test run: build the video but do NOT upload"
         type: boolean
         default: false
+      private_only:
+        description: "Test run: upload as private, no schedule, no notification"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -44,6 +48,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
+          PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
         run: python -u generate.py 2>&1 | tee run.log
 
       - name: Save log, preview and topic history
