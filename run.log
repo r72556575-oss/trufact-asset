@@ -1,30 +1,45 @@
-candidate reply: [   "London Beer Flood",   "Erfurt latrine disaster",   "Dancing plague of 1518",   "Cadaver Synod",   "Operation Mincemeat",   "Emu War",   "Wojtek (bear)",   "Great Molasses Flood" ]
-  candidate 'London Beer Flood' -> 'London Beer Flood', 8564 chars
-topic: London Beer Flood | extract chars: 8564
-TITLE: The Bizarre 1814 London Beer Flood
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
+  [gemini-flash-latest] HTTP 503: {
   "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  speech 36.2s, total video 42.1s
-  [gemini-2.5-flash-image] HTTP 429: {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
   "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
-  image 1: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 2: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 3: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 4: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 5: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 6: pollinations
-  pollinations HTTP 402, 322 bytes (try 1)
-  image 7: pollinations
-rendered out/short.mp4
-upload skipped
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=240)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+Traceback (most recent call last):
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 530, in <module>
+    main()
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 492, in main
+    hist = load_history(); script = make_script(hist)
+                                    ^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 90, in make_script
+    cj = text_of(gemini(TEXT_MODEL, {"contents": [{"parts": [{"text":
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 54, in gemini
+    raise RuntimeError(f"Gemini call failed: {model}")
+RuntimeError: Gemini call failed: gemini-flash-latest
