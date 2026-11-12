@@ -97,7 +97,9 @@ def make_script(hist):
     title, extract = None, None
     cj = text_of(gemini_text({"contents": [{"parts": [{"text":
         f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
-        f"each good for an amazing 45-second story. Do not use these used topics: {used}. "
+        f"each good for an amazing 45-second story. Prefer topics about concrete, VISUAL things that are easy to draw as cartoons "
+        f"(animals, plants, places, buildings, machines, space objects, inventions, food, historical objects). Avoid abstract topics "
+        f"(medical syndromes, psychology effects, economics, laws) and avoid grim topics (deaths, disasters, crime). Do not use these used topics: {used}. "
         "Return a JSON list of exact Wikipedia article titles (strings) only."}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}}))
     log("candidate reply:", cj[:300].replace("\n", " "))
@@ -126,9 +128,9 @@ Return JSON with this exact shape:
 Rules:
 - Exactly 7 beats = 7 short sentences, told as a story: hook, tension, reveal, explanation, closing punch. 
 - "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
-  English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 95-110 Hindi words. No emojis.
+  English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
-- "image_prompt": a vivid scene for a vertical 2D cartoon illustration of that beat (what is visible, who/what, action, setting). No text, no logos, no real people, no violence.
+- "image_prompt": ONE simple, concrete picture for that beat in 15-30 English words: a single clear main subject (an animal, object, building, planet...) doing one visible thing, plus the setting. Name the subject explicitly (e.g. "a friendly cartoon octopus holding three glowing hearts in an underwater cave"). No abstract ideas, no text, no logos, no real people, no violence.
 - "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
@@ -244,9 +246,9 @@ def card(title, sub="", seed=0):
     if title: d.text((W // 2, H // 2 - 200), title, font=font(190), fill=(255, 255, 255), anchor="mm", stroke_width=12, stroke_fill=INK)
     return im
 
-STYLE = ("Cute colorful 2D cartoon illustration, flat vector colors, cel shading, bold black outlines, bright cheerful palette, "
-         "simple clean background, friendly expressive cartoon characters, children's book style, vertical 9:16 composition, "
-         "no text, no letters, no watermark. Scene: ")
+STYLE_TAIL = ("Cute colorful flat 2D cartoon illustration, bold black outlines, bright cheerful palette, simple clean background, "
+              "one clear main subject centered, vertical composition, no text, no letters, no watermark.")
+def style_prompt(prompt): return f"{prompt.strip()}. {STYLE_TAIL}"
 
 IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
 _gemini_img_ok = True
@@ -256,7 +258,7 @@ _last_poll = [0.0]
 def pollinations(prompt):
     """Free anonymous service: it answers HTTP 402/429 if called too often, so keep >=35 s between requests."""
     import io, urllib.parse
-    q = urllib.parse.quote((STYLE + prompt)[:700])
+    q = urllib.parse.quote(style_prompt(prompt)[:700])
     for k in range(6):
         wait = 36 - (time.time() - _last_poll[0])
         if wait > 0: time.sleep(wait)
@@ -278,7 +280,7 @@ def get_image(prompt, i):
     for prov in IMG_PROVIDERS:
         if prov == "gemini" and _gemini_img_ok:
             try:
-                resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": STYLE + prompt}]}],
+                resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": style_prompt(prompt)}]}],
                               "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "9:16"}}}, tries=1)
                 raw, _ = inline_of(resp)
                 if raw:
@@ -456,7 +458,7 @@ def next_publish_utc():
 
 def host_video(path):
     """Publish the mp4 as a GitHub release asset (public URL, no repo bloat). Falls back to committing it."""
-    repo = os.environ["GITHUB_REPOSITORY"]; tag = "daily-" + datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")
+    repo = os.environ["GITHUB_REPOSITORY"]; tag = "daily-" + datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M")
     subprocess.run(["gh", "release", "create", tag, path, "--title", tag, "--notes", "auto-generated short"], check=True)
     # delete releases older than 3 days
     try:
@@ -477,7 +479,7 @@ async def zapier_upload(args):
     async with Client(tr) as c:
         tools = [t.name for t in await c.list_tools()]; log("  zapier tools:", tools)
         res = await c.call_tool("execute_zapier_write_action", {"action": "upload_video", "params": args, "selected_api": "YouTubeV4CLIAPI"})
-        txt = " ".join(getattr(x, "text", "") for x in res.content); log("  zapier result:", txt[:600])
+        txt = " ".join(getattr(x, "text", "") for x in res.content); log("  zapier result:", txt[:1800])
         if getattr(res, "is_error", False) or "isError\":true" in txt: raise RuntimeError("Zapier upload failed: " + txt[:300])
         return txt
 
