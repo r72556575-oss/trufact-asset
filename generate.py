@@ -236,9 +236,9 @@ def card(title, sub="", seed=0):
     if title: d.text((W // 2, H // 2 - 200), title, font=font(190), fill=(255, 255, 255), anchor="mm", stroke_width=12, stroke_fill=INK)
     return im
 
-STYLE = ("Flat 2D cartoon illustration, thick black ink outlines, bright saturated colours, simple clean background, "
-         "friendly expressive characters, vertical 9:16 composition, subject centred in the upper two thirds, "
-         "no text, no letters, no watermark, no logo. Scene: ")
+STYLE = ("Cute colorful 2D cartoon illustration, flat vector colors, cel shading, bold black outlines, bright cheerful palette, "
+         "simple clean background, friendly expressive cartoon characters, children's book style, vertical 9:16 composition, "
+         "no text, no letters, no watermark. Scene: ")
 
 IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
 _gemini_img_ok = True
@@ -478,6 +478,8 @@ def publish(path, script):
     args = {"title": script["title"][:95], "description": script["description"] + f"\n\nHindi narration, English captions.\n#Shorts",
             "tags": script.get("tags", [])[:12] + ["Shorts"], "privacy_status": "private", "publish_at": pub,
             "made_for_kids": False, "notify_subscribers": True, "default_audio_language": "hi", "video": url}
+    if os.environ.get("PRIVATE_ONLY") == "1":                  # test mode: stay private, never auto-publish, no notification
+        args.pop("publish_at", None); args["notify_subscribers"] = False
     for attempt in range(3):
         try: return asyncio.run(zapier_upload(args))
         except Exception as e:
