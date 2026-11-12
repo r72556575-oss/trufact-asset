@@ -43,3 +43,70 @@ Traceback (most recent call last):
   File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 54, in gemini
     raise RuntimeError(f"Gemini call failed: {model}")
 RuntimeError: Gemini call failed: gemini-flash-latest
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+candidate reply: [   "Foreign accent syndrome",   "Fetus in fetu",   "Fatal familial insomnia",   "Hyperthymesia",   "Mirror-touch synesthesia",   "Aquagenic urticaria",   "Alice in Wonderland syndrome",   "Prosopagnosia" ]
+  candidate 'Foreign accent syndrome' -> 'Foreign accent syndrome', 12813 chars
+topic: Foreign accent syndrome | extract chars: 12813
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+TITLE: The Mystery of Foreign Accent Syndrome
+  speech 35.5s, total video 41.4s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 3: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 5: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 7: pollinations
+rendered out/short.mp4
+/home/runner/work/trufact-asset/trufact-asset/generate.py:459: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  repo = os.environ["GITHUB_REPOSITORY"]; tag = "daily-" + datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")
+https://github.com/r72556575-oss/trufact-asset/releases/tag/daily-20261112-0237
+video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261112-0237/short.mp4 | publishAt 2026-11-13T01:30:00Z
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action', 'list_zapier_connections', 'manage_zapier_connections', 'send_feedback', 'auto_provision_mcp', 'list_zapier_skills', 'get_zapier_skill', 'create_zapier_skill', 'update_zapier_skill', 'delete_zapier_skill', 'write_code_action', 'get_configuration_url']
+  zapier result: {"results":[{"publishedAt":"2026-11-12T02:37:32Z","channelId":"UCHAPwr7m6QRmqvf7sngCPbg","title":"The Mystery of Foreign Accent Syndrome","description":"Discover the rare medical condition where people sound foreign without learning a new language. Learn the science behind Foreign Accent Syndrome. #ForeignAccentSyndrome #MedicalMystery #BrainFacts #RareCondition #TruFact\n\nHindi narration, English captions.\n#Shorts","thumbnails":{"default":{"url":"https://i9.ytimg.com/vi/QLpAH8qkVwI/default.jpg?sqp=CNTL1NcG&rs=AOn4CLCR8dcXSdCre2w7dkcM70CsPoCAfA","width":120,"height":90},"medium":{"url":"http
+done
