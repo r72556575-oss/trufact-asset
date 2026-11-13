@@ -249,3 +249,82 @@ video url: https://github.com/r72556575-oss/trufact-asset/releases/download/dail
   zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action', 'list_zapier_connections', 'manage_zapier_connections', 'send_feedback', 'auto_provision_mcp', 'list_zapier_skills', 'get_zapier_skill', 'create_zapier_skill', 'update_zapier_skill', 'delete_zapier_skill', 'write_code_action', 'get_configuration_url']
   zapier result: {"results":[{"publishedAt":"2026-11-12T15:39:36Z","channelId":"UCHAPwr7m6QRmqvf7sngCPbg","title":"The Invisible Stripes on Your Skin","description":"Discover the mystery of Blaschko's lines, the invisible patterns tracing our embryonic development. Learn how these hidden shapes become visible in certain conditions. #BlaschkosLines #SkinScience #HumanBiology #Genetics #TruFact\n\nHindi narration, English captions.\n#Shorts","thumbnails":{"default":{"url":"https://i9.ytimg.com/vi/xo8-AeSvOvQ/default.jpg?sqp=CKS519cG&rs=AOn4CLCvPnYGJKZVAoutoFwUy7UGRiEMig","width":120,"height":90},"medium":{"url":"https://i9.ytimg.com/vi/xo8-AeSvOvQ/mqdefault.jpg?sqp=CKS519cG&rs=AOn4CLAD6gj56dv55chS-IBTXUVXf4LrQA","width":320,"height":180},"high":{"url":"https://i9.ytimg.com/vi/xo8-AeSvOvQ/hqdefault.jpg?sqp=CKS519cG&rs=AOn4CLBB-cw2SgWDWEfdqYdamU9SmEpLIg","width":480,"height":360}},"channelTitle":"TruFact","tags":["Alfred Blaschko","Blaschko lines","Shorts","biology facts","chimerism","dermatology","embryology","mosaicism","skin patterns"],"categoryId":"27","liveBroadcastContent":"none","localized":{"title":"The Invisible Stripes on Your Skin","description":"Discover the mystery of Blaschko's lines, the invisible patterns tracing our embryonic development. Learn how these hidden shapes become visible in certain conditions. #BlaschkosLines #SkinScience #HumanBiology #Genetics #TruFact\n\nHindi narration, English captions.\n#Shorts"},"defaultAudioLanguage":"hi","uploadStatus":"uploaded","privacyStatus":"private","publishAt":"2026-11-13T01:30:00Z","license":"youtube","embeddable":true,"publicStatsViewable":true,"selfDeclaredMadeForKids":false,"id":"xo8-AeSvOvQ","embed_url":"https://www.youtube.com/embed/xo8-AeSvOvQ","play_url":"https://www.youtube.com/watch?v=xo8-AeSvOvQ"}]}
 done
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+candidate reply: [   "Mantis shrimp",   "Axolotl",   "Lyrebird",   "Tardigrade",   "Archerfish",   "Mimic octopus",   "Wombat",   "Platypus" ]
+  candidate 'Mantis shrimp' -> 'Mantis shrimp', 25749 chars
+topic: Mantis shrimp | extract chars: 25749
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+TITLE: The Incredible Power of the Mantis Shrimp
+  [gemini-3.1-flash-tts-preview] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
+  speech 44.2s, total video 47.4s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 3: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 5: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 7: pollinations
+  picture 1: card
+  picture 2: card
+  picture 3: card
+  picture 4: sticker
+  picture 5: card
+  picture 6: card
+  picture 7: card
+rendered out/short.mp4
+https://github.com/r72556575-oss/trufact-asset/releases/tag/daily-20261113-0141
+video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261113-0141/short.mp4 | publishAt 2026-11-14T01:30:00Z
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  zapier result: {"results":[{"publishedAt":"2026-11-13T01:41:34Z","channelId":"UCHAPwr7m6QRmqvf7sngCPbg","title":"The Incredible Power of the Mantis Shrimp","description":"Discover the underwater warrior with the fastest punch and most complex eyes in the animal kingdom. Learn how this tiny creature hits twice with one strike. #MantisShrimp #NatureFacts #OceanLife #ScienceFacts #TruFact\n\nHindi narration, English captions.\n#Shorts","thumbnails":{"default":{"url":"https://i9.ytimg.com/vi/UjNIpiYAchg/default.jpg?sqp=CPDU2dcG&rs=AOn4CLBGulBzIusj_UDzOGHg-qb1StfKIw","width":120,"height":90},"medium":{"url":"https://i9.ytimg.com/vi/UjNIpiYAchg/mqdefault.jpg?sqp=CPDU2dcG&rs=AOn4CLAEB5IS2i4JvhRv8wftzmodLrxtag","width":320,"height":180},"high":{"url":"https://i9.ytimg.com/vi/UjNIpiYAchg/hqdefault.jpg?sqp=CPDU2dcG&rs=AOn4CLBjga6SoPpE06QrLOZgkt7qcuYtLw","width":480,"height":360}},"channelTitle":"TruFact","tags":["Shorts","animal facts","evolution","mantis shrimp","marine biology","nature","ocean predators","science","underwater"],"categoryId":"27","liveBroadcastContent":"none","localized":{"title":"The Incredible Power of the Mantis Shrimp","description":"Discover the underwater warrior with the fastest punch and most complex eyes in the animal kingdom. Learn how this tiny creature hits twice with one strike. #MantisShrimp #NatureFacts #OceanLife #ScienceFacts #TruFact\n\nHindi narration, English captions.\n#Shorts"},"defaultAudioLanguage":"hi","uploadStatus":"uploaded","privacyStatus":"private","license":"youtube","embeddable":true,"publicStatsViewable":true,"selfDeclaredMadeForKids":false,"id":"UjNIpiYAchg","embed_url":"https://www.youtube.com/embed/UjNIpiYAchg","play_url":"https://www.youtube.com/watch?v=UjNIpiYAchg"}]}
+  video id: UjNIpiYAchg | https://www.youtube.com/watch?v=UjNIpiYAchg
+  hide-stats update: {"results":[{"status":200,"headers":{"content-type":"application/json; charset=UTF-8"},"body":{"kind":"youtube#video","etag":"s7V760_HbtrZLem6cyLb6SjulZQ","id":"UjNIpiYAchg","status":{"uploadStatus":"uploaded","privacyStatus":"private","license":"youtube","embeddable":true,"publicStatsViewable":false,"selfDeclaredMadeForKids":false}}}]}
+done
