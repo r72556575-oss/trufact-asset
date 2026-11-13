@@ -2,7 +2,7 @@ name: daily-short
 
 on:
   schedule:
-    - cron: "30 14 * * *"      # 20:00 IST every day; video goes public 07:00 IST next morning
+    - cron: "30 21 * * *"      # 03:00 IST every day: build + upload (private); goes public at 07:00 IST
   workflow_dispatch:
     inputs:
       skip_upload:
