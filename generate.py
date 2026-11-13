@@ -9,6 +9,7 @@ import os, sys, json, math, base64, time, random, wave, subprocess, datetime, re
 import numpy as np
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+import toon, scenes
 
 # ----------------------------------------------------------------------------- config
 SR = 24000
@@ -123,14 +124,19 @@ Return JSON with this exact shape:
 {{"title": "<English title, max 60 chars, curiosity-driven, no clickbait lies>",
   "description": "<2-3 English sentences + 5 hashtags>",
   "tags": ["<8 short English tags>"],
-  "beats": [ {{"hindi": "...", "english": "...", "image_prompt": "...", "sfx": "whoosh|pop|none"}} ]}}
+  "beats": [ {{"hindi": "...", "english": "...", "image_prompt": "...", "sfx": "whoosh|pop|none",
+               "setting": "village|city|mountains|ocean|desert|space|indoor", "time": "day|sunset|night",
+               "camera": "push_in|pull_back|pan_left|pan_right|shake|static",
+               "cast": [ {{"role": "boy|girl|scientist|elder|king|worker|explorer", "slot": "left|center|right", "expr": "neutral|happy|surprised|sad|angry|think|laugh", "action": "idle|talk|point|think|surprised|cheer|wave|sad|walk_in"}} ],
+               "fx": "none|sparkles|exclamation|question|sweat|hearts|stars"}} ]}}
 
 Rules:
 - Exactly 7 beats = 7 short sentences, told as a story: hook, tension, reveal, explanation, closing punch. 
 - "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
   English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
-- "image_prompt": ONE simple, concrete picture for that beat in 15-30 English words: a single clear main subject (an animal, object, building, planet...) doing one visible thing, plus the setting. Name the subject explicitly (e.g. "a friendly cartoon octopus holding three glowing hearts in an underwater cave"). No abstract ideas, no text, no logos, no real people, no violence.
+- "image_prompt": the ONE main SUBJECT to draw for that beat, as a short noun phrase of 4-12 English words (e.g. "a happy cartoon octopus with three hearts", "an ancient stone bridge", "a glowing full moon"). A single physical thing, no scene, no background, no abstract ideas, no text, no real people, no violence. Use a different subject for each beat.
+- Scene fields: each beat is a tiny cartoon scene. Pick the "setting" that fits the story place (use the SAME setting for neighbouring beats of the same place), the "time" of day, a "camera" move, and 1-3 "cast" characters who ACT OUT / REACT to what the narrator says (surprised for a shock, think for a puzzle, cheer for success, point when something is shown, sad for a failure). Vary slots, roles, expressions and actions between beats; at most one "walk_in" per beat. "fx": exclamation for a surprise, question for a mystery, sparkles/stars for a wonder, hearts for love, sweat for worry, otherwise none.
 - "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
@@ -157,8 +163,15 @@ def offline_script():
           "So what was the Romans' secret? Scientists found it in 2023.", "They mixed in quicklime, which heats up as it's mixed.",
           "That left tiny white chunks hidden inside.", "When a crack forms, water reaches those chunks, and they dissolve and fill the crack.",
           "The concrete literally repairs itself!"]
+    SC = [dict(setting="village", time="day", camera="push_in", fx="sparkles", cast=[dict(role="elder", slot="left", expr="happy", action="talk"), dict(role="boy", slot="right", expr="surprised", action="point")]),
+          dict(setting="city", time="sunset", camera="pan_left", fx="sweat", cast=[dict(role="worker", slot="center", expr="sad", action="sad")]),
+          dict(setting="indoor", time="day", camera="pull_back", fx="question", cast=[dict(role="scientist", slot="left", expr="think", action="think"), dict(role="girl", slot="right", expr="neutral", action="idle")]),
+          dict(setting="indoor", time="day", camera="push_in", fx="exclamation", cast=[dict(role="king", slot="center", expr="surprised", action="surprised")]),
+          dict(setting="mountains", time="day", camera="pan_right", fx="none", cast=[dict(role="explorer", slot="left", expr="happy", action="walk_in"), dict(role="girl", slot="center", expr="happy", action="wave")]),
+          dict(setting="ocean", time="sunset", camera="shake", fx="hearts", cast=[dict(role="boy", slot="center", expr="laugh", action="cheer")]),
+          dict(setting="space", time="night", camera="pull_back", fx="stars", cast=[dict(role="scientist", slot="left", expr="laugh", action="cheer"), dict(role="worker", slot="right", expr="happy", action="cheer")])]
     return {"title": "Romans' Concrete HEALS ITSELF", "description": "Test.", "tags": ["test"],
-            "beats": [{"hindi": h, "english": e, "image_prompt": e, "sfx": "pop" if i in (2, 3) else "whoosh"} for i, (h, e) in enumerate(zip(H7, E7))]}
+            "beats": [dict(hindi=h, english=e, image_prompt=e, sfx="pop" if i in (2, 3) else "whoosh", **SC[i]) for i, (h, e) in enumerate(zip(H7, E7))]}
 
 # ----------------------------------------------------------------------------- 2. voice
 def read_wav(path):
@@ -246,8 +259,8 @@ def card(title, sub="", seed=0):
     if title: d.text((W // 2, H // 2 - 200), title, font=font(190), fill=(255, 255, 255), anchor="mm", stroke_width=12, stroke_fill=INK)
     return im
 
-STYLE_TAIL = ("Cute colorful flat 2D cartoon illustration, bold black outlines, bright cheerful palette, simple clean background, "
-              "one clear main subject centered, vertical composition, no text, no letters, no watermark.")
+STYLE_TAIL = ("flat 2D cartoon sticker illustration of this single subject, bold black outlines, bright cheerful colors, cute friendly style, "
+              "centered, isolated on a plain pure white background, no scenery, no ground, no shadow, no text, no letters, no watermark")
 def style_prompt(prompt): return f"{prompt.strip()}. {STYLE_TAIL}"
 
 IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
@@ -264,7 +277,7 @@ def pollinations(prompt):
         if wait > 0: time.sleep(wait)
         _last_poll[0] = time.time()
         try:
-            r = requests.get(f"https://image.pollinations.ai/prompt/{q}", params={"width": 768, "height": 1344, "nologo": "true", "model": "flux",
+            r = requests.get(f"https://image.pollinations.ai/prompt/{q}", params={"width": 768, "height": 768, "nologo": "true", "model": "flux",
                              "seed": random.randint(1, 10 ** 6)}, timeout=150)
             _last_poll[0] = time.time()
             if r.status_code == 200 and r.headers.get("content-type", "").startswith("image") and len(r.content) > 8000:
@@ -274,14 +287,24 @@ def pollinations(prompt):
             log("  pollinations error:", e)
     return None
 
+def stub_subject(i):
+    """plain cartoon blob on white (offline tests and last-resort fallback)"""
+    im = Image.new("RGB", (768, 768), (255, 255, 255)); d = ImageDraw.Draw(im)
+    col = [(255, 120, 100), (100, 180, 255), (120, 210, 120), (255, 200, 70)][i % 4]
+    for k in range(5): d.line([(250 + k * 66, 470), (225 + k * 80, 690)], fill=INK, width=52); d.line([(250 + k * 66, 470), (225 + k * 80, 690)], fill=col, width=40)
+    d.ellipse([150, 110, 620, 540], fill=col, outline=INK, width=12)
+    for ex in (290, 480): d.ellipse([ex - 48, 250 - 52, ex + 48, 250 + 52], fill=(255, 255, 255), outline=INK, width=8); d.ellipse([ex - 18, 250 - 20, ex + 18, 250 + 20], fill=INK)
+    d.arc([300, 330, 470, 440], 15, 165, fill=INK, width=10)
+    return im
+
 def get_image(prompt, i):
     global _gemini_img_ok
-    if OFFLINE or not GKEY: return card(f"{i+1}", "", i)
+    if OFFLINE or not GKEY: return stub_subject(i)
     for prov in IMG_PROVIDERS:
         if prov == "gemini" and _gemini_img_ok:
             try:
                 resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": style_prompt(prompt)}]}],
-                              "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "9:16"}}}, tries=1)
+                              "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "1:1"}}}, tries=1)
                 raw, _ = inline_of(resp)
                 if raw:
                     import io
@@ -292,8 +315,8 @@ def get_image(prompt, i):
             im = pollinations(prompt)
             if im is not None:
                 log(f"  image {i+1}: pollinations"); return im
-    log(f"  image {i+1}: using fallback card")
-    return card(f"{i+1}", "", i)
+    log(f"  image {i+1}: no picture available, using a plain star")
+    return stub_subject(i)
 
 # ----------------------------------------------------------------------------- 4. music + sfx (synthesized, no copyright)
 def synth_music(dur, seed):
@@ -400,53 +423,18 @@ def caption_img(g, active, scale=1.0):
         full = Image.new("RGBA", (W, 240), (0, 0, 0, 0)); full.alpha_composite(lay, ((W - lay.width) // 2, (240 - lay.height) // 2)); lay = full
     return lay
 
-def prep(src):
-    s = 1.16
-    return ImageOps.fit(src.convert("RGB"), (int(W * s), int(H * s)), Image.LANCZOS)
+def number_of(beat):
+    m = re.search(r"\d[\d,\.]*%?", beat.get("english", ""))
+    return m.group(0).rstrip(".,")[:6] if m else ""
 
-def kb(src, mode, p, punch):
-    sw, sh = src.size
-    z = {"in": 1.0 + 0.14 * ease(p), "out": 1.14 - 0.14 * ease(p), "left": 1.10, "right": 1.10}[mode] * (1 + punch)
-    cw, ch = sw / (1.16 * z), sh / (1.16 * z)
-    px = ease(p) if mode == "right" else (1 - ease(p) if mode == "left" else 0.5)
-    x0 = (sw - cw) * px; y0 = (sh - ch) * (0.5 + (0.12 * (p - 0.5) if mode in ("in", "out") else 0))
-    return src.resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + cw, y0 + ch))
-
-def render_video(path_noaudio, images, beats, starts, durs, total_sec):
-    srcs = [prep(im) for im in images]; modes = ["in", "right", "out", "left", "in", "out", "right", "in"]
-    grad = np.zeros((H, W, 4), np.uint8); ramp = np.clip((np.arange(H) - H * 0.58) / (H * 0.42), 0, 1) ** 1.4 * 150
-    grad[..., 3] = ramp[:, None].astype(np.uint8); grad_img = Image.fromarray(grad, "RGBA")
-    groups = []
-    for i, b in enumerate(beats): groups += [dict(g, beat=i) for g in make_groups(i, b["english"], starts[i] + 0.02, starts[i] + b["speech"])]
-    cache = {}
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
-           "-i", os.path.join(OUT, "audio.wav"), "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
-           "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-t", f"{total_sec:.3f}", "-movflags", "+faststart", path_noaudio]
-    pr = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    nfr = int(total_sec * FPS)
-    for f in range(nfr):
-        t = f / FPS
-        bi = max(i for i in range(len(beats)) if starts[i] <= t + 1e-6)
-        lt = t - starts[bi]; p = lt / max(durs[bi], 0.1)
-        punch = 0.05 * (1 - min(lt / 0.22, 1)) ** 2
-        im = kb(srcs[bi], modes[bi % len(modes)], p, punch).convert("RGBA")
-        im.alpha_composite(grad_img)
-        if lt < 0.1: im = Image.blend(im, Image.new("RGBA", (W, H), (255, 255, 255, 255)), 0.30 * (1 - lt / 0.1))
-        g = next((x for x in groups if x["t0"] <= t < x["t1"]), None)
-        if g:
-            act = next((i for i, (a, b) in enumerate(g["times"]) if a - 0.02 <= t < b + 0.02), len(g["words"]) - 1 if t >= g["times"][-1][1] else 0)
-            sc = 0.86 + 0.14 * min(1, (t - g["t0"]) * FPS / 5) if (t - g["t0"]) * FPS < 5 else 1.0
-            key = (id(g), act, round(sc, 2))
-            if key not in cache: cache[key] = caption_img(g, act, sc)
-            im.alpha_composite(cache[key], (0, 1400))
-        if beats[bi].get("brand"):
-            d = ImageDraw.Draw(im); a = ease(lt / 0.5)
-            d.text((W // 2, 760), CHANNEL, font=font(220), fill=(255, 226, 70, 255), anchor="mm", stroke_width=16, stroke_fill=INK)
-            d.rounded_rectangle([W // 2 - 230, 930, W // 2 + 230, 1050], 60, fill=(235, 40, 40, 255), outline=INK, width=8)
-            d.text((W // 2, 990), "FOLLOW", font=font(70), fill=(255, 255, 255, 255), anchor="mm")
-        pr.stdin.write(im.convert("RGB").tobytes())
-    pr.stdin.close(); pr.wait()
-    if pr.returncode != 0: raise RuntimeError("ffmpeg failed")
+def lip_amplitude(starts, segs, total):
+    n = int(total * SR); voice = np.zeros(n, np.float32)
+    for st, sp in zip(starts, segs): voice[int(st * SR): int(st * SR) + len(sp)] += np.abs(sp) / 32768
+    hop = SR // FPS; nfr = int(total * FPS) + 2
+    a = np.array([voice[i * hop:(i + 1) * hop].mean() if len(voice[i * hop:(i + 1) * hop]) else 0 for i in range(nfr)])
+    a = np.clip(a / (np.percentile(a[a > 0.002], 90) + 1e-6), 0, 1) if (a > 0.002).any() else a
+    a = np.convolve(a, np.ones(3) / 3, mode="same"); a[a < 0.12] = 0
+    return a
 
 # ----------------------------------------------------------------------------- 6. publish via Zapier MCP (verified YouTube client)
 def next_publish_utc():
@@ -471,16 +459,29 @@ def host_video(path):
     except Exception as e: log("  release cleanup skipped:", e)
     return f"https://github.com/{repo}/releases/download/{tag}/{os.path.basename(path)}"
 
-async def zapier_upload(args):
+async def zapier_upload(args, pub=None):
     from fastmcp import Client
     from fastmcp.client.transports import StreamableHttpTransport
     tok = os.environ["ZAPIER_MCP_TOKEN"]
     tr = StreamableHttpTransport("https://mcp.zapier.com/api/v1/connect", headers={"Authorization": f"Bearer {tok}"})
     async with Client(tr) as c:
-        tools = [t.name for t in await c.list_tools()]; log("  zapier tools:", tools)
+        tools = [t.name for t in await c.list_tools()]; log("  zapier tools:", tools[:6], "...")
         res = await c.call_tool("execute_zapier_write_action", {"action": "upload_video", "params": args, "selected_api": "YouTubeV4CLIAPI"})
         txt = " ".join(getattr(x, "text", "") for x in res.content); log("  zapier result:", txt[:1800])
         if getattr(res, "is_error", False) or "isError\":true" in txt: raise RuntimeError("Zapier upload failed: " + txt[:300])
+        # Extra settings the upload action does not offer: hide extended public statistics (the like-count toggle itself is not in the API)
+        m = re.search(r'"(?:id|videoId)"\s*:\s*"([A-Za-z0-9_-]{11})"', txt)
+        if m:
+            vid = m.group(1); log("  video id:", vid, "| https://www.youtube.com/watch?v=" + vid)
+            try:
+                status = {"privacyStatus": "private", "license": "youtube", "embeddable": True, "publicStatsViewable": False, "selfDeclaredMadeForKids": False}
+                if pub: status["publishAt"] = pub
+                r2 = await c.call_tool("execute_zapier_write_action", {"action": "_zap_raw_request", "selected_api": "YouTubeV4CLIAPI", "params": {
+                    "fail_on_errors": "true", "method": "PUT", "querystring": {"part": "status"},
+                    "url": "https://www.googleapis.com/youtube/v3/videos", "body": json.dumps({"id": vid, "status": status})}})
+                log("  hide-stats update:", " ".join(getattr(x, "text", "") for x in r2.content)[:400])
+            except Exception as e: log("  hide-stats update failed (video is still uploaded):", e)
+        else: log("  could not read the video id from the answer")
         return txt
 
 def publish(path, script):
@@ -491,7 +492,7 @@ def publish(path, script):
     if os.environ.get("PRIVATE_ONLY") == "1":                  # test mode: stay private, never auto-publish, no notification
         args.pop("publish_at", None); args["notify_subscribers"] = False
     for attempt in range(3):
-        try: return asyncio.run(zapier_upload(args))
+        try: return asyncio.run(zapier_upload(args, args.get('publish_at')))
         except Exception as e:
             log(f"  upload attempt {attempt+1} failed: {e}"); time.sleep(30)
     raise RuntimeError("YouTube upload failed after 3 tries")
@@ -502,7 +503,8 @@ def main():
     hist = load_history(); script = make_script(hist)
     log("TITLE:", script["title"])
     cta = {"hindi": "ऐसे ही हैरान करने वाले फैक्ट्स के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new fact every day!",
-           "image_prompt": "", "sfx": "ding", "brand": True}
+           "image_prompt": "", "sfx": "ding", "brand": True, "setting": "indoor", "time": "day", "camera": "push_in", "fx": "sparkles",
+           "cast": [{"role": "boy", "slot": "left", "expr": "laugh", "action": "cheer"}, {"role": "girl", "slot": "right", "expr": "laugh", "action": "cheer"}]}
     beats = script["beats"] + [cta]
     segs = build_voice(beats)
     speech_sec = [len(s) / SR for s in segs]
@@ -527,8 +529,13 @@ def main():
     audio = mix_audio(durs, starts, segs, total, sfx_plan, seed=datetime.date.today().toordinal())
     write_wav(os.path.join(OUT, "audio.wav"), audio * 32767)
     images = [get_image(b["image_prompt"], i) for i, b in enumerate(script["beats"])]
-    images.append(card("", "", 99))
-    render_video(os.path.join(OUT, "short.mp4"), images, beats, starts, durs, total)
+    stickers = []
+    for i, im in enumerate(images):
+        st, kind = toon.sticker_or_card(im); stickers.append(st); log(f"  picture {i+1}: {kind}")
+    stickers.append(toon.cta_sticker(CHANNEL))
+    groups = []
+    for i, b in enumerate(beats): groups += [dict(g, beat=i) for g in make_groups(i, b["english"], starts[i] + 0.02, starts[i] + b["speech"])]
+    scenes.render(os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), stickers, beats, starts, durs, total, groups, caption_img, number_of, brand_idx=len(beats) - 1)
     log("rendered", os.path.join(OUT, "short.mp4"))
     if OFFLINE or os.environ.get("SKIP_UPLOAD") == "1": log("upload skipped"); return
     res = publish(os.path.join(OUT, "short.mp4"), script)
