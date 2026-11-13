@@ -328,3 +328,99 @@ video url: https://github.com/r72556575-oss/trufact-asset/releases/download/dail
   video id: UjNIpiYAchg | https://www.youtube.com/watch?v=UjNIpiYAchg
   hide-stats update: {"results":[{"status":200,"headers":{"content-type":"application/json; charset=UTF-8"},"body":{"kind":"youtube#video","etag":"s7V760_HbtrZLem6cyLb6SjulZQ","id":"UjNIpiYAchg","status":{"uploadStatus":"uploaded","privacyStatus":"private","license":"youtube","embeddable":true,"publicStatsViewable":false,"selfDeclaredMadeForKids":false}}}]}
 done
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+  [gemini-3-flash-preview] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+candidate reply: [   "Axolotl",   "Greater honeyguide",   "Mimic octopus",   "Tardigrade",   "Platypus",   "Superb lyrebird",   "Turritopsis dohrnii",   "Wood frog" ]
+  candidate 'Axolotl' -> 'Axolotl', 27837 chars
+topic: Axolotl | extract chars: 27837
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+TITLE: The Incredible Immortal Axolotl
+  speech 41.0s, total video 45.0s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 3: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 5: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 7: pollinations
+  picture 1: sticker
+  picture 2: card
+  picture 3: card
+  picture 4: sticker
+  picture 5: card
+  picture 6: card
+  picture 7: card
+rendered out/short.mp4
+https://github.com/r72556575-oss/trufact-asset/releases/tag/daily-20261113-2229
+video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261113-2229/short.mp4 | publishAt 2026-11-14T01:30:00Z
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  zapier result: {"results":[{"publishedAt":"2026-11-13T22:29:41Z","channelId":"UCHAPwr7m6QRmqvf7sngCPbg","title":"The Incredible Immortal Axolotl","description":"Discover the Mexican water dog that can regrow its own brain and never grows up. This critically endangered salamander is a true scientific marvel. #axolotl #nature #science #animals #conservation\n\nHindi narration, English captions.\n#Shorts","thumbnails":{"default":{"url":"https://i9.ytimg.com/vi/pw-ooGptNn8/default.jpg?sqp=CLyc3tcG&rs=AOn4CLAZFF4pv4oU3GOD3UYtl5mEwmQ1mQ","width":120,"height":90},"medium":{"url":"https://i9.ytimg.com/vi/pw-ooGptNn8/mqdefault.jpg?sqp=CLyc3tcG&rs=AOn4CLDyqDdOm_fANgcIl_bYDwNth_No7w","width":320,"height":180},"high":{"url":"https://i9.ytimg.com/vi/pw-ooGptNn8/hqdefault.jpg?sqp=CLyc3tcG&rs=AOn4CLDqX1QCfCgLNPder_ydrjVbGDfaJw","width":480,"height":360}},"channelTitle":"TruFact","tags":["Shorts","axolotl","biology","endangered","mexico","nature","regeneration","salamander","science"],"categoryId":"27","liveBroadcastContent":"none","localized":{"title":"The Incredible Immortal Axolotl","description":"Discover the Mexican water dog that can regrow its own brain and never grows up. This critically endangered salamander is a true scientific marvel. #axolotl #nature #science #animals #conservation\n\nHindi narration, English captions.\n#Shorts"},"defaultAudioLanguage":"hi","uploadStatus":"uploaded","privacyStatus":"private","publishAt":"2026-11-14T01:30:00Z","license":"youtube","embeddable":true,"publicStatsViewable":true,"selfDeclaredMadeForKids":false,"id":"pw-ooGptNn8","embed_url":"https://www.youtube.com/embed/pw-ooGptNn8","play_url":"https://www.youtube.com/watch?v=pw-ooGptNn8"}]}
+  video id: pw-ooGptNn8 | https://www.youtube.com/watch?v=pw-ooGptNn8
+  hide-stats update: {"results":[{"status":200,"headers":{"content-type":"application/json; charset=UTF-8"},"body":{"kind":"youtube#video","etag":"7CscnR691zISWXVYjPm-NVSD9cg","id":"pw-ooGptNn8","status":{"uploadStatus":"uploaded","privacyStatus":"private","publishAt":"2026-11-14T01:30:00Z","license":"youtube","embeddable":true,"publicStatsViewable":false,"selfDeclaredMadeForKids":false}}}]}
+done
