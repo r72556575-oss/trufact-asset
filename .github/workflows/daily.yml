@@ -9,6 +9,10 @@ on:
         description: "Test run: build the video but do NOT upload"
         type: boolean
         default: false
+      analyze_only:
+        description: "Test run: only analyse the channel and pick the topic"
+        type: boolean
+        default: false
       private_only:
         description: "Test run: upload as private, no schedule, no notification"
         type: boolean
@@ -49,6 +53,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
           PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
+          ANALYZE_ONLY: ${{ inputs.analyze_only && '1' || '0' }}
         run: |
           ok=0
           for i in 1 2 3; do
