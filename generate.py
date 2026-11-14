@@ -74,6 +74,61 @@ def inline_of(resp):
         if d and d.get("data"): return base64.b64decode(d["data"]), (d.get("mimeType") or d.get("mime_type") or "")
     return None, ""
 
+
+# ----------------------------------------------------------------------------- 0. channel analysis (through the owner's Zapier/YouTube connection)
+def _first_json(txt):
+    i = txt.find("{")
+    if i < 0: return None
+    try: return json.JSONDecoder().raw_decode(txt[i:])[0]
+    except Exception: return None
+
+async def _yt_get(c, url, qs):
+    r = await c.call_tool("execute_zapier_read_action", {"action": "_zap_raw_request", "selected_api": "YouTubeV4CLIAPI",
+        "params": {"fail_on_errors": "true", "method": "GET", "querystring": qs, "url": url}})
+    for x in r.content:
+        o = _first_json(getattr(x, "text", "") or "")
+        if o and "results" in o: return o["results"][0].get("body", {})
+    raise RuntimeError("no body from YouTube request")
+
+async def _channel_data():
+    from fastmcp import Client
+    from fastmcp.client.transports import StreamableHttpTransport
+    tr = StreamableHttpTransport("https://mcp.zapier.com/api/v1/connect", headers={"Authorization": f"Bearer {os.environ['ZAPIER_MCP_TOKEN']}"})
+    base = "https://www.googleapis.com/youtube/v3"
+    async with Client(tr) as c:
+        ch = await _yt_get(c, f"{base}/channels", {"mine": "true", "part": "snippet,statistics,contentDetails,brandingSettings"})
+        item = ch["items"][0]; up = item["contentDetails"]["relatedPlaylists"]["uploads"]
+        pl = await _yt_get(c, f"{base}/playlistItems", {"playlistId": up, "part": "contentDetails", "maxResults": "50"})
+        ids = [i["contentDetails"]["videoId"] for i in pl.get("items", [])]
+        vids = []
+        if ids: vids = (await _yt_get(c, f"{base}/videos", {"id": ",".join(ids), "part": "snippet,statistics,status"})).get("items", [])
+        skill = ""
+        try:
+            sr = await c.call_tool("get_zapier_skill", {"name": "upload to youtube"})
+            skill = " ".join(getattr(x, "text", "") for x in sr.content)[:3500]
+        except Exception as e: log("  owner notes (skill) not read:", e)
+    return item, vids, skill
+
+def channel_profile():
+    """what the channel is about and which videos worked - used to choose the next topic"""
+    if OFFLINE or not os.environ.get("ZAPIER_MCP_TOKEN"): return None
+    try: item, vids, skill = asyncio.run(_channel_data())
+    except Exception as e:
+        log("  channel analysis unavailable:", e); return None
+    sn, st = item.get("snippet", {}), item.get("statistics", {}); bd = item.get("brandingSettings", {}).get("channel", {})
+    rows = []
+    for v in vids:
+        s_, t_ = v["snippet"], v.get("statistics", {})
+        rows.append(dict(title=s_["title"], published=s_["publishedAt"][:10], views=int(t_.get("viewCount", 0)), likes=int(t_.get("likeCount", 0)),
+                         comments=int(t_.get("commentCount", 0)), privacy=v.get("status", {}).get("privacyStatus"), tags=(s_.get("tags") or [])[:6]))
+    public = sorted([r for r in rows if r["privacy"] != "private"], key=lambda r: -r["views"])
+    text = (f"CHANNEL: {sn.get('title')} | {sn.get('description', '')[:400]} | keywords: {bd.get('keywords', '')} | subscribers: {st.get('subscriberCount')} "
+            f"| total views: {st.get('viewCount')} | video count: {st.get('videoCount')}\nPUBLIC VIDEOS, BEST FIRST: {json.dumps(public[:40], ensure_ascii=False)}\n"
+            f"ALL UPLOADED TITLES (never repeat): {json.dumps([r['title'] for r in rows], ensure_ascii=False)}")
+    if skill: text += f"\nOWNER NOTES ABOUT THE CHANNEL IDEA:\n{skill}"
+    log("CHANNEL PROFILE:", text[:3500].replace("\n", " | "))
+    return text
+
 # ----------------------------------------------------------------------------- 1. topic + script
 def load_history():
     try: return json.load(open(HIST))
@@ -96,17 +151,27 @@ def make_script(hist):
     if OFFLINE: return offline_script()
     # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
     title, extract = None, None
-    cj = text_of(gemini_text({"contents": [{"parts": [{"text":
-        f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
-        f"each good for an amazing 45-second story. Prefer topics about concrete, VISUAL things that are easy to draw as cartoons "
-        f"(animals, plants, places, buildings, machines, space objects, inventions, food, historical objects). Avoid abstract topics "
-        f"(medical syndromes, psychology effects, economics, laws) and avoid grim topics (deaths, disasters, crime). Do not use these used topics: {used}. "
-        "Return a JSON list of exact Wikipedia article titles (strings) only."}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 1.0}}))
+    profile = channel_profile()
+    if profile:
+        ask = (f"You are the content strategist of a YouTube Shorts channel. Here is the channel data:\n{profile}\n\n"
+               "1) Infer the channel's niche, audience and tone, and which topics/themes got the most views and likes. "
+               "2) Suggest 10 English Wikipedia article titles for the NEXT 45-second Short. Each must: fit the channel's niche and audience; be a NEW topic "
+               "(not any uploaded title, not in this used list: " + str(used) + "); echo the themes of the best-performing videos without copying them; "
+               "be a WELL-KNOWN, relatable subject that many people are curious about and have heard of (never obscure, never medical syndromes or rare diseases, "
+               "never grim: no disasters, deaths, crime); and be easy to draw as a cartoon (animals, places, buildings, machines, space, inventions, food, history). "
+               "Return JSON: {\"niche\": \"...\", \"audience\": \"...\", \"why\": \"...\", \"wikipedia_titles\": [\"exact Wikipedia article title\", ...]} with the best fit first.")
+    else:
+        ask = (f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
+               f"each good for an amazing 45-second story. Prefer concrete, VISUAL, well-known topics that are easy to draw as cartoons; avoid obscure topics, "
+               f"medical syndromes and grim topics (deaths, disasters, crime). Do not use these used topics: {used}. Return a JSON list of exact Wikipedia article titles only.")
+    cj = text_of(gemini_text({"contents": [{"parts": [{"text": ask}]}],
+        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9}}))
     log("candidate reply:", cj[:300].replace("\n", " "))
     try: cands = json.loads(re.sub(r"^```json|```$", "", cj.strip(), flags=re.M).strip())
     except Exception as e: log("  candidate JSON error:", e); cands = []
-    if isinstance(cands, dict): cands = next((v for v in cands.values() if isinstance(v, list)), [])
+    if isinstance(cands, dict):
+        log("  strategist says: niche=", cands.get("niche"), "| audience=", cands.get("audience"), "| why=", cands.get("why"))
+        cands = cands.get("wikipedia_titles") or next((v for v in cands.values() if isinstance(v, list)), [])
     for t in cands:
         t = t if isinstance(t, str) else (t.get("title") if isinstance(t, dict) else str(t))
         title, extract = wiki_extract(str(t))
@@ -502,6 +567,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     hist = load_history(); script = make_script(hist)
     log("TITLE:", script["title"])
+    if os.environ.get("ANALYZE_ONLY") == "1":
+        log("BEATS:", json.dumps([b["english"] for b in script["beats"]], ensure_ascii=False)); log("analysis only: stopping before the video"); return
     cta = {"hindi": "ऐसे ही हैरान करने वाले फैक्ट्स के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new fact every day!",
            "image_prompt": "", "sfx": "ding", "brand": True, "setting": "indoor", "time": "day", "camera": "push_in", "fx": "sparkles",
            "cast": [{"role": "boy", "slot": "left", "expr": "laugh", "action": "cheer"}, {"role": "girl", "slot": "right", "expr": "laugh", "action": "cheer"}]}
