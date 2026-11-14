@@ -447,3 +447,165 @@ topic: Statue of Unity | extract chars: 9139
 TITLE: The World's Tallest Statue: Statue of Unity
 BEATS: ["Do you know the world's tallest statue is located in Gujarat, India?", "This 182-meter tall grand statue honors the famous independence activist Sardar Patel.", "Narendra Modi announced this project in the Narmada valley in the year 2010.", "Farmers donated 135 metric tonnes of old iron tools to help build it.", "Sculptor Ram V. Sutar designed it with a very narrow base for its height.", "This statue can withstand 180 km/h winds and large earthquake shocks.", "It was grandly inaugurated in 2018 on Patel's 143rd birthday."]
 analysis only: stopping before the video
+CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 77 | total views: 31342 | video count: 26 | PUBLIC VIDEOS, BEST FIRST: [{"title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "views": 3513, "likes": 72, "comments": 2, "privacy": "public", "tags": ["#short"]}, {"title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "views": 3232, "likes": 66, "comments": 6, "privacy": "public", "tags": ["powerful countries", "top 5 powerful countries", "world's most powerful countries, strongest countries in the world,"]}, {"title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "views": 2617, "likes": 36, "comments": 3, "privacy": "public", "tags": ["1962 war"]}, {"title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "views": 2311, "likes": 59, "comments": 3, "privacy": "public", "tags": []}, {"title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "views": 1570, "likes": 41, "comments": 2, "privacy": "public", "tags": []}, {"title": "अमेरिका vs North Korea: कौन असली बादशाह? 👑🔥", "published": "2026-09-24", "views": 1562, "likes": 32, "comments": 2, "privacy": "public", "tags": []}, {"title": "Google Tricks ! 😱🔥 #shorts", "published": "2026-10-18", "views": 1558, "likes": 18, "comments": 2, "privacy": "public", "tags": ["short"]}, {"title": "The War Fought Over One Pig 🐖", "published": "2026-11-08", "views": 1499, "likes": 18, "comments": 1, "privacy": "public", "tags": []}, {"title": "🇮🇳🇨🇳 India-China के रिश्तों में आया बड़ा बदलाव! 😱 पूरी दुनिया की नजर क्यों?", "published": "2026-09-16", "views": 1499, "likes": 49, "comments": 5, "privacy": "public", "tags": ["#fact", "#news", "country war", "country classes", "war2"]}, {"title": "🇮🇳 India को दुनिया हल्के में लेती है… लेकिन ये 4 चीजें चौंका देंगी! 😱#sanctionsonindia", "published": "2026-09-15", "views": 1438, "likes": 30, "comments": 4, "privacy": "public", "tags": []}, {"title": "Top 5  😱  Unbelievable FACTS #shorts #facts", "published": "2026-10-08", "views": 1424, "likes": 25, "comments": 1, "privacy": "public", "tags": ["fact", "short"]}, {"title": "Kim Jong Un Gave Extreme Punishments For Small Mistakes😮", "published": "2026-10-07", "views": 1294, "likes": 40, "comments": 3, "privacy": "public", "tags": ["short", "all fact sr"]}, {"title": "THESE THREE THINGS NEVER SEARCH 🔍 ON GOOGLE 😱", "published": "2026-10-17", "views": 1283, "likes": 17, "comments": 2, "privacy": "public", "tags": []}, {"title": "What Do 10 Countries Call Their Money? 🌍💰 #shorts", "published": "2026-10-14", "views": 1247, "likes": 22, "comments": 2, "privacy": "public", "tags": ["money", "country"]}, {"title": "top 3 best luxury car 🚗 |#car #luxury #trending @TruFact-k6h #luxuriouscars", "published": "2026-10-11", "views": 1235, "likes": 27, "comments": 0, "privacy": "public", "
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+candidate reply: {   "niche": "Hindi Geopolitics & World Curiosities",   "audience": "Hindi-speaking youth and adults interested in Indian achievements, global comparisons, and mysterious historical trivia.",   "why": "The channel's highest-performing videos focus on India's global standing, economic comparisons, an
+  strategist says: niche= Hindi Geopolitics & World Curiosities | audience= Hindi-speaking youth and adults interested in Indian achievements, global comparisons, and mysterious historical trivia. | why= The channel's highest-performing videos focus on India's global standing, economic comparisons, and large-scale geopolitical or historical mysteries. Topics involving 'Top' lists or 'Powerful' entities resonate most with the current subscriber base.
+  candidate 'Statue of Unity' -> 'Statue of Unity', 9139 chars
+topic: Statue of Unity | extract chars: 9139
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  text model gemini-flash-latest unavailable, trying next
+TITLE: The Secrets of the World's Tallest Statue
+  speech 37.6s, total video 43.5s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 3: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 5: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 7: pollinations
+  picture 1: card
+  picture 2: card
+  picture 3: card
+  picture 4: card
+  picture 5: sticker
+  picture 6: card
+  picture 7: card
+Traceback (most recent call last):
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 614, in <module>
+    main()
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 605, in main
+    scenes.render(os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), stickers, beats, starts, durs, total, groups, caption_img, number_of, brand_idx=len(beats) - 1)
+  File "/home/runner/work/trufact-asset/trufact-asset/scenes.py", line 244, in render
+    if num: toon.badge(im, num, lt)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/trufact-asset/trufact-asset/toon.py", line 174, in badge
+    d.ellipse([150 - r, 150 - r, 150 + r, 150 + r], fill=INK + (255,)); d.ellipse([150 - r + 9, 150 - r + 9, 150 + r - 9, 150 + r - 9], fill=(255, 226, 70, 255))
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/PIL/ImageDraw.py", line 211, in ellipse
+    self.draw.draw_ellipse(xy, fill_ink, 1)
+ValueError: x1 must be greater than or equal to x0
+attempt 1 failed, retrying in 120 s
+CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 77 | total views: 31342 | video count: 26 | PUBLIC VIDEOS, BEST FIRST: [{"title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "views": 3513, "likes": 72, "comments": 2, "privacy": "public", "tags": ["#short"]}, {"title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "views": 3233, "likes": 66, "comments": 6, "privacy": "public", "tags": ["powerful countries", "top 5 powerful countries", "world's most powerful countries, strongest countries in the world,"]}, {"title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "views": 2617, "likes": 36, "comments": 3, "privacy": "public", "tags": ["1962 war"]}, {"title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "views": 2311, "likes": 59, "comments": 3, "privacy": "public", "tags": []}, {"title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "views": 1570, "likes": 41, "comments": 2, "privacy": "public", "tags": []}, {"title": "अमेरिका vs North Korea: कौन असली बादशाह? 👑🔥", "published": "2026-09-24", "views": 1562, "likes": 32, "comments": 2, "privacy": "public", "tags": []}, {"title": "Google Tricks ! 😱🔥 #shorts", "published": "2026-10-18", "views": 1558, "likes": 18, "comments": 2, "privacy": "public", "tags": ["short"]}, {"title": "The War Fought Over One Pig 🐖", "published": "2026-11-08", "views": 1499, "likes": 18, "comments": 1, "privacy": "public", "tags": []}, {"title": "🇮🇳🇨🇳 India-China के रिश्तों में आया बड़ा बदलाव! 😱 पूरी दुनिया की नजर क्यों?", "published": "2026-09-16", "views": 1499, "likes": 49, "comments": 5, "privacy": "public", "tags": ["#fact", "#news", "country war", "country classes", "war2"]}, {"title": "🇮🇳 India को दुनिया हल्के में लेती है… लेकिन ये 4 चीजें चौंका देंगी! 😱#sanctionsonindia", "published": "2026-09-15", "views": 1438, "likes": 30, "comments": 4, "privacy": "public", "tags": []}, {"title": "Top 5  😱  Unbelievable FACTS #shorts #facts", "published": "2026-10-08", "views": 1424, "likes": 25, "comments": 1, "privacy": "public", "tags": ["fact", "short"]}, {"title": "Kim Jong Un Gave Extreme Punishments For Small Mistakes😮", "published": "2026-10-07", "views": 1294, "likes": 40, "comments": 3, "privacy": "public", "tags": ["short", "all fact sr"]}, {"title": "THESE THREE THINGS NEVER SEARCH 🔍 ON GOOGLE 😱", "published": "2026-10-17", "views": 1283, "likes": 17, "comments": 2, "privacy": "public", "tags": []}, {"title": "What Do 10 Countries Call Their Money? 🌍💰 #shorts", "published": "2026-10-14", "views": 1247, "likes": 22, "comments": 2, "privacy": "public", "tags": ["money", "country"]}, {"title": "top 3 best luxury car 🚗 |#car #luxury #trending @TruFact-k6h #luxuriouscars", "published": "2026-10-11", "views": 1235, "likes": 27, "comments": 0, "privacy": "public", "
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  text model gemini-flash-latest unavailable, trying next
+candidate reply: {   "niche": "Hindi Geopolitical, Indian Pride, and Curiosity-Driven Fact Shorts.",   "audience": "Hindi-speaking youth (15-35) in India interested in national achievements, global comparisons, world records, and mind-blowing general knowledge.",   "why": "Data shows the highest engagement comes fro
+  strategist says: niche= Hindi Geopolitical, Indian Pride, and Curiosity-Driven Fact Shorts. | audience= Hindi-speaking youth (15-35) in India interested in national achievements, global comparisons, world records, and mind-blowing general knowledge. | why= Data shows the highest engagement comes from topics involving Indian economic rankings, global power comparisons (Top 5 countries), and historical mysteries. The audience prefers high-stakes, visual, and patriotic themes with a 'shock' factor (emoji-heavy).
+  candidate 'Burj Khalifa' -> 'Burj Khalifa', 30073 chars
+topic: Burj Khalifa | extract chars: 30073
+  [gemini-flash-latest] HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  text model gemini-flash-latest unavailable, trying next
+TITLE: The Secret History of Burj Khalifa
+  speech 42.1s, total video 45.3s
+  [gemini-2.5-flash-image] HTTP 429: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
+  gemini image unavailable (Gemini call failed: gemini-2.5-flash-image); not trying it again this run
+  image 1: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 2: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 3: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 4: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 5: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 6: pollinations
+  pollinations HTTP 402, 322 bytes (try 1)
+  image 7: pollinations
+  picture 1: card
+  picture 2: sticker
+  picture 3: card
+  picture 4: card
+  picture 5: card
+  picture 6: card
+  picture 7: card
+Traceback (most recent call last):
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 614, in <module>
+    main()
+  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 605, in main
+    scenes.render(os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), stickers, beats, starts, durs, total, groups, caption_img, number_of, brand_idx=len(beats) - 1)
+  File "/home/runner/work/trufact-asset/trufact-asset/scenes.py", line 244, in render
+    if num: toon.badge(im, num, lt)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/trufact-asset/trufact-asset/toon.py", line 174, in badge
+    d.ellipse([150 - r, 150 - r, 150 + r, 150 + r], fill=INK + (255,)); d.ellipse([150 - r + 9, 150 - r + 9, 150 + r - 9, 150 + r - 9], fill=(255, 226, 70, 255))
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/PIL/ImageDraw.py", line 211, in ellipse
+    self.draw.draw_ellipse(xy, fill_ink, 1)
+ValueError: x1 must be greater than or equal to x0
+attempt 2 failed, retrying in 120 s
+CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 76 | total views: 31342 | video count: 26 | PUBLIC VIDEOS, BEST FIRST: [{"title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "views": 3513, "likes": 72, "comments": 2, "privacy": "public", "tags": ["#short"]}, {"title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "views": 3232, "likes": 66, "comments": 6, "privacy": "public", "tags": ["powerful countries", "top 5 powerful countries", "world's most powerful countries, strongest countries in the world,"]}, {"title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "views": 2617, "likes": 36, "comments": 3, "privacy": "public", "tags": ["1962 war"]}, {"title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "views": 2311, "likes": 59, "comments": 3, "privacy": "public", "tags": []}, {"title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "views": 1570, "likes": 41, "comments": 2, "privacy": "public", "tags": []}, {"title": "अमेरिका vs North Korea: कौन असली बादशाह? 👑🔥", "published": "2026-09-24", "views": 1562, "likes": 32, "comments": 2, "privacy": "public", "tags": []}, {"title": "Google Tricks ! 😱🔥 #shorts", "published": "2026-10-18", "views": 1558, "likes": 18, "comments": 2, "privacy": "public", "tags": ["short"]}, {"title": "The War Fought Over One Pig 🐖", "published": "2026-11-08", "views": 1499, "likes": 18, "comments": 1, "privacy": "public", "tags": []}, {"title": "🇮🇳🇨🇳 India-China के रिश्तों में आया बड़ा बदलाव! 😱 पूरी दुनिया की नजर क्यों?", "published": "2026-09-16", "views": 1499, "likes": 49, "comments": 5, "privacy": "public", "tags": ["#fact", "#news", "country war", "country classes", "war2"]}, {"title": "🇮🇳 India को दुनिया हल्के में लेती है… लेकिन ये 4 चीजें चौंका देंगी! 😱#sanctionsonindia", "published": "2026-09-15", "views": 1438, "likes": 30, "comments": 4, "privacy": "public", "tags": []}, {"title": "Top 5  😱  Unbelievable FACTS #shorts #facts", "published": "2026-10-08", "views": 1424, "likes": 25, "comments": 1, "privacy": "public", "tags": ["fact", "short"]}, {"title": "Kim Jong Un Gave Extreme Punishments For Small Mistakes😮", "published": "2026-10-07", "views": 1294, "likes": 40, "comments": 3, "privacy": "public", "tags": ["short", "all fact sr"]}, {"title": "THESE THREE THINGS NEVER SEARCH 🔍 ON GOOGLE 😱", "published": "2026-10-17", "views": 1283, "likes": 17, "comments": 2, "privacy": "public", "tags": []}, {"title": "What Do 10 Countries Call Their Money? 🌍💰 #shorts", "published": "2026-10-14", "views": 1247, "likes": 22, "comments": 2, "privacy": "public", "tags": ["money", "country"]}, {"title": "top 3 best luxury car 🚗 |#car #luxury #trending @TruFact-k6h #luxuriouscars", "published": "2026-10-11", "views": 1235, "likes": 27, "comments": 0, "privacy": "public", "
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
