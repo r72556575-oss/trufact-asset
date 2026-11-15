@@ -233,15 +233,20 @@ def render(out_path, audio_path, stickers, beats, starts, durs, total_sec, group
             gx, gy = x + xo, GROUND + 70
             wd.ellipse([gx - 80, gy - 12, gx + 80, gy + 16], fill=(0, 0, 0, 60))
             world.alpha_composite(spr, (int(gx - 210), int(gy - (600 * (spr.height / 640)))))
-            if sc["fx"] != "none" and k == 0: draw_fx(world, sc["fx"], lt, gx + 20 * facing, gy - 560)
+            if sc["fx"] != "none" and k == 0:
+                try: draw_fx(world, sc["fx"], lt, gx + 20 * facing, gy - 560)
+                except Exception: pass
         box = camera_window({"push_in": "push_in"}.get(sc["camera"], sc["camera"]), p, lt)
         im = world.crop(tuple(int(v) for v in box)).resize((W, H), Image.BILINEAR)
         im.alpha_composite(shade)
         st = stickers[bi]
-        if st is not None and not cta: toon.paste_sticker(im, st, lt, bi)
-        if cta: toon.paste_sticker(im, st, lt, 0)
-        num = number_of(beats[bi])
-        if num: toon.badge(im, num, lt)
+        try:
+            if st is not None and not cta: toon.paste_sticker(im, st, lt, bi)
+            if cta: toon.paste_sticker(im, st, lt, 0)
+            num = number_of(beats[bi])
+            if num: toon.badge(im, num, lt)
+        except Exception as e:
+            if f % 90 == 0: print('  (decoration skipped:', e, ')', flush=True)
         if lt < 0.1: im = Image.blend(im, Image.new("RGBA", (W, H), (255, 255, 255, 255)), 0.30 * (1 - lt / 0.1))
         g = next((x for x in groups if x["t0"] <= t < x["t1"]), None)
         if g:
