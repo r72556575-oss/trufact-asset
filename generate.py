@@ -332,12 +332,14 @@ IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(","
 _gemini_img_ok = True
 
 _last_poll = [0.0]
+_poll_deadline = [time.time() + 600]      # at most 10 minutes of waiting for the free service per run
 
 def pollinations(prompt):
     """Free anonymous service: it answers HTTP 402/429 if called too often, so keep >=35 s between requests."""
     import io, urllib.parse
     q = urllib.parse.quote(style_prompt(prompt)[:700])
-    for k in range(6):
+    for k in range(5):
+        if time.time() > _poll_deadline[0]: log('  pollinations time budget used up'); return None
         wait = 36 - (time.time() - _last_poll[0])
         if wait > 0: time.sleep(wait)
         _last_poll[0] = time.time()
@@ -505,6 +507,13 @@ def lip_amplitude(starts, segs, total):
 def next_publish_utc():
     ist = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
     now = datetime.datetime.now(ist)
+    ov = os.environ.get("PUBLISH_AT_IST", "").strip()           # e.g. 2026-11-15T09:00 (catch-up run)
+    if ov:
+        try:
+            tgt = datetime.datetime.fromisoformat(ov).replace(tzinfo=ist)
+            if tgt < now + datetime.timedelta(minutes=12): tgt = now + datetime.timedelta(minutes=12)
+            return tgt.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        except Exception as e: log("  bad PUBLISH_AT_IST:", e)
     tgt = now.replace(hour=PUBLISH_HOUR_IST, minute=PUBLISH_MIN_IST, second=0, microsecond=0)
     if tgt <= now + datetime.timedelta(minutes=45): tgt += datetime.timedelta(days=1)
     return tgt.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
