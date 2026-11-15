@@ -9,6 +9,10 @@ on:
         description: "Test run: build the video but do NOT upload"
         type: boolean
         default: false
+      publish_at_ist:
+        description: "Catch-up run: publish at this IST time, e.g. 2026-11-15T09:00 (empty = next 07:00 IST)"
+        type: string
+        default: ""
       analyze_only:
         description: "Test run: only analyse the channel and pick the topic"
         type: boolean
@@ -28,7 +32,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@v4
 
@@ -54,9 +58,11 @@ jobs:
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
           PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
           ANALYZE_ONLY: ${{ inputs.analyze_only && '1' || '0' }}
+          PUBLISH_AT_IST: ${{ inputs.publish_at_ist }}
         run: |
           ok=0
-          for i in 1 2 3; do
+          : > run.log
+          for i in 1 2; do
             if python -u generate.py 2>&1 | tee -a run.log; then ok=1; break; fi
             echo "attempt $i failed, retrying in 120 s" | tee -a run.log; sleep 120
           done
