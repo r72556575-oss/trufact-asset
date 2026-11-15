@@ -25,13 +25,15 @@ def make_sticker(img, maxside=720):
     img = img.convert("RGB")
     if max(img.size) > 800: img = ImageOps.contain(img, (800, 800), Image.LANCZOS)
     a = np.asarray(img).astype(np.int16)
-    near_white = a.min(axis=2) > 232
-    lab, n = ndimage.label(near_white)
+    edge = np.concatenate([a[0], a[-1], a[:, 0], a[:, -1]]); bgc = np.median(edge, axis=0)
+    if bgc.mean() < 185: return None                                   # background is not light: do not try to cut out
+    near = np.abs(a - bgc).max(axis=2) < 46
+    lab, n = ndimage.label(near)
     if n == 0: return None
     border = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]])); border = border[border > 0]
     bg = np.isin(lab, border); fg = ~bg
     frac = fg.mean()
-    if frac < 0.04 or frac > 0.80: return None
+    if frac < 0.03 or frac > 0.88: return None
     lab2, n2 = ndimage.label(fg)
     sizes = ndimage.sum(fg, lab2, range(1, n2 + 1))
     fg = np.isin(lab2, [i + 1 for i, s in enumerate(sizes) if s >= 0.10 * sizes.max()])
@@ -170,6 +172,7 @@ def badge(im, text, lt):
     e = over((lt - 0.35) / 0.35, 2.2)
     if e <= 0.02: return
     r = int(118 * e); cx, cy = 888, 250 + 8 * math.sin(lt * 4)
+    if r < 24: return
     lay = Image.new("RGBA", (300, 300), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
     d.ellipse([150 - r, 150 - r, 150 + r, 150 + r], fill=INK + (255,)); d.ellipse([150 - r + 9, 150 - r + 9, 150 + r - 9, 150 + r - 9], fill=(255, 226, 70, 255))
     size = 96 if len(text) <= 3 else (72 if len(text) <= 5 else 52)
