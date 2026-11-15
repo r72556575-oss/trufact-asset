@@ -21,6 +21,7 @@ ROLES = {
     "king": dict(skin=(250, 200, 160), hair=("short", (90, 60, 40)), shirt=(168, 40, 66), pants=(50, 40, 100), crown=True, beard=(90, 60, 40)),
     "worker": dict(skin=(225, 175, 130), hair=("cap", (255, 200, 40)), shirt=(255, 160, 30), pants=(60, 80, 120)),
     "explorer": dict(skin=(245, 205, 165), hair=("hat", (170, 125, 70)), shirt=(110, 150, 80), pants=(120, 90, 60)),
+    "soldier": dict(skin=(235, 185, 145), hair=("helmet", (150, 156, 168)), shirt=(104, 116, 140), pants=(96, 72, 58), beard=(70, 50, 40)),
 }
 EXPRS = ["neutral", "happy", "surprised", "sad", "angry", "think", "laugh"]
 ACTIONS = ["idle", "talk", "point", "think", "surprised", "cheer", "wave", "sad", "walk_in"]
@@ -138,6 +139,10 @@ def character(role, t, expr, action, blink=False, walk=0.0, look=0.5):
         d.pieslice([X(-96), Y(hy - 92), X(96), Y(hy + 86)], 178, 362, fill=hc, outline=INK, width=7 * S); E(-90, hy + 50, 22, 62, hc, 6); E(90, hy + 50, 22, 62, hc, 6); E(0, hy, 92, 86, R["skin"], 7)
         d.pieslice([X(-96), Y(hy - 92), X(96), Y(hy + 86)], 192, 348, fill=hc, outline=INK, width=7 * S)
     elif kind == "cap": d.pieslice([X(-92), Y(hy - 86), X(92), Y(hy + 86)], 182, 358, fill=hc, outline=INK, width=7 * S); d.rounded_rectangle([X(-110), Y(hy - 20), X(70), Y(hy - 2)], 8 * S, fill=hc, outline=INK, width=6 * S)
+    elif kind == "helmet":
+        d.pieslice([X(-96), Y(hy - 96), X(96), Y(hy + 80)], 178, 362, fill=hc, outline=INK, width=7 * S)
+        Pg([(-16, hy - 92), (0, hy - 146), (16, hy - 92)], (214, 60, 60)); d.line([(X(0), Y(hy - 94)), (X(0), Y(hy - 20))], fill=INK, width=6 * S)
+        d.rounded_rectangle([X(-100), Y(hy - 28), X(100), Y(hy - 8)], 8 * S, fill=(120, 126, 140), outline=INK, width=6 * S)
     elif kind == "hat":
         E(0, hy - 62, 128, 26, hc, 7); d.pieslice([X(-76), Y(hy - 150), X(76), Y(hy - 20)], 180, 360, fill=hc, outline=INK, width=7 * S)
     if R.get("crown"): Pg([(-60, hy - 78), (-60, hy - 130), (-30, hy - 100), (0, hy - 140), (30, hy - 100), (60, hy - 130), (60, hy - 78)], (255, 206, 60))
