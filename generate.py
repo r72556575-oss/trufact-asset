@@ -332,13 +332,14 @@ IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(","
 _gemini_img_ok = True
 
 _last_poll = [0.0]
-_poll_deadline = [time.time() + 600]      # at most 10 minutes of waiting for the free service per run
+_poll_deadline = [None]      # set when the picture phase starts: at most 12 minutes of waiting for the free service
 
 def pollinations(prompt):
     """Free anonymous service: it answers HTTP 402/429 if called too often, so keep >=35 s between requests."""
     import io, urllib.parse
     q = urllib.parse.quote(style_prompt(prompt)[:700])
     for k in range(5):
+        if _poll_deadline[0] is None: _poll_deadline[0] = time.time() + 720
         if time.time() > _poll_deadline[0]: log('  pollinations time budget used up'); return None
         wait = 36 - (time.time() - _last_poll[0])
         if wait > 0: time.sleep(wait)
@@ -382,8 +383,8 @@ def get_image(prompt, i):
             im = pollinations(prompt)
             if im is not None:
                 log(f"  image {i+1}: pollinations"); return im
-    log(f"  image {i+1}: no picture available, using a plain star")
-    return stub_subject(i)
+    log(f"  image {i+1}: no picture available, this scene runs without a prop")
+    return None
 
 # ----------------------------------------------------------------------------- 4. music + sfx (synthesized, no copyright)
 def synth_music(dur, seed):
@@ -607,6 +608,7 @@ def main():
     images = [get_image(b["image_prompt"], i) for i, b in enumerate(script["beats"])]
     stickers = []
     for i, im in enumerate(images):
+        if im is None: stickers.append(None); log(f"  picture {i+1}: none"); continue
         st, kind = toon.sticker_or_card(im); stickers.append(st); log(f"  picture {i+1}: {kind}")
     stickers.append(toon.cta_sticker(CHANNEL))
     groups = []
