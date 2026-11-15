@@ -25,8 +25,13 @@ VOICE = os.environ.get("GEMINI_VOICE", "Puck")           # boy voice
 TARGET_SEC = float(os.environ.get("TARGET_SEC", "45"))
 PUBLISH_HOUR_IST, PUBLISH_MIN_IST = 7, 0
 CHANNEL = "TruFact"
-CATEGORIES = ["Space", "History", "Human body", "Animals", "Chemistry and everyday science", "Technology",
-              "Earth and nature", "Psychology and the brain", "Ancient engineering", "Oceans"]
+# The owner's chosen story type: how the weaker side won a war with a clever trick ("jugaad") in olden times.
+STORY_BRIEF = ("true stories from old history (before 1950) where soldiers, kings or commanders who were OUTNUMBERED or weaker won a battle or war "
+               "through a clever trick, deception, local jugaad, smart use of terrain/animals/weather/tools. Examples of the kind of story: "
+               "Chanakya and Chandragupta's strategies, Shivaji Maharaj's guerrilla tactics, Lachit Borphukan at Saraighat, Maharana Pratap's Chetak and hill tactics, "
+               "Rani Durgavati, Porus vs Alexander, Raja Suhaldev, the Trojan Horse, Hannibal's fire-oxen trick, the Battle of Red Cliffs, Mongol feigned retreat, "
+               "Operation Mincemeat, the Ghost Army, Thermopylae and Marathon tactics, Zheng He, Admiral Yi Sun-sin's turtle ships")
+CATEGORIES = ["Indian history"] * 7 + ["world history"] * 3             # 70 percent Indian stories, 30 percent world stories
 FONT_CANDS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
               "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"]
 FONT_PATH = next((p for p in FONT_CANDS if os.path.exists(p)), None)
@@ -152,18 +157,16 @@ def make_script(hist):
     # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
     title, extract = None, None
     profile = channel_profile()
-    if profile:
-        ask = (f"You are the content strategist of a YouTube Shorts channel. Here is the channel data:\n{profile}\n\n"
-               "1) Infer the channel's niche, audience and tone, and which topics/themes got the most views and likes. "
-               "2) Suggest 10 English Wikipedia article titles for the NEXT 45-second Short. Each must: fit the channel's niche and audience; be a NEW topic "
-               "(not any uploaded title, not in this used list: " + str(used) + "); echo the themes of the best-performing videos without copying them; "
-               "be a WELL-KNOWN, relatable subject that many people are curious about and have heard of (never obscure, never medical syndromes or rare diseases, "
-               "never grim: no disasters, deaths, crime); and be easy to draw as a cartoon (animals, places, buildings, machines, space, inventions, food, history). "
-               "Return JSON: {\"niche\": \"...\", \"audience\": \"...\", \"why\": \"...\", \"wikipedia_titles\": [\"exact Wikipedia article title\", ...]} with the best fit first.")
-    else:
-        ask = (f"Suggest 8 different English Wikipedia article titles about surprising, well-documented, TRUE facts in the category '{cat}', "
-               f"each good for an amazing 45-second story. Prefer concrete, VISUAL, well-known topics that are easy to draw as cartoons; avoid obscure topics, "
-               f"medical syndromes and grim topics (deaths, disasters, crime). Do not use these used topics: {used}. Return a JSON list of exact Wikipedia article titles only.")
+    region = "Indian history (India's kings, commanders and soldiers)" if cat == "Indian history" else "world history (any country)"
+    ctx = (f"CHANNEL DATA (for tone and audience only):\n{profile}\n\n") if profile else ""
+    ask = (f"You choose the next 45-second YouTube Shorts story for a Hindi channel.\n{ctx}"
+           f"MANDATORY STORY TYPE: {STORY_BRIEF}.\n"
+           f"Today's region: {region}.\n"
+           "Suggest 10 English Wikipedia article titles (a battle, siege, campaign, operation or ruler/commander article) for stories of this type. Each must: "
+           "be a clear, well-sourced event where the clever trick or jugaad is documented in the article; be NEW (not in this used list: " + str(used) + "); "
+           "be well known or at least exciting for Hindi-speaking youth; contain no graphic gore; avoid anything about religion-versus-religion conflict, "
+           "modern politics or events after 1950. "
+           "Return JSON: {\"niche\": \"...\", \"audience\": \"...\", \"why\": \"...\", \"wikipedia_titles\": [\"exact Wikipedia article title\", ...]} with the best story first.")
     cj = text_of(gemini_text({"contents": [{"parts": [{"text": ask}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9}}))
     log("candidate reply:", cj[:300].replace("\n", " "))
@@ -176,12 +179,12 @@ def make_script(hist):
         t = t if isinstance(t, str) else (t.get("title") if isinstance(t, dict) else str(t))
         title, extract = wiki_extract(str(t))
         log(f"  candidate {t!r} -> {title!r}, {len(extract or '')} chars")
-        if extract and len(extract) >= 1500: break
+        if extract and len(extract) >= 2500: break
         title, extract = None, None
     if not extract: raise RuntimeError("no usable Wikipedia topic found")
     research = f"Wikipedia article '{title}':\n{extract[:7500]}"
     log("topic:", title, "| extract chars:", len(extract))
-    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}.
+    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}: a dramatic true war story about how the weaker side won with a clever trick (jugaad).
 Use ONLY facts that are stated in this source text (do not add outside facts):
 {research}
 
@@ -192,16 +195,16 @@ Return JSON with this exact shape:
   "beats": [ {{"hindi": "...", "english": "...", "image_prompt": "...", "sfx": "whoosh|pop|none",
                "setting": "village|city|mountains|ocean|desert|space|indoor", "time": "day|sunset|night",
                "camera": "push_in|pull_back|pan_left|pan_right|shake|static",
-               "cast": [ {{"role": "boy|girl|scientist|elder|king|worker|explorer", "slot": "left|center|right", "expr": "neutral|happy|surprised|sad|angry|think|laugh", "action": "idle|talk|point|think|surprised|cheer|wave|sad|walk_in"}} ],
+               "cast": [ {{"role": "boy|girl|scientist|elder|king|worker|explorer|soldier", "slot": "left|center|right", "expr": "neutral|happy|surprised|sad|angry|think|laugh", "action": "idle|talk|point|think|surprised|cheer|wave|sad|walk_in"}} ],
                "fx": "none|sparkles|exclamation|question|sweat|hearts|stars"}} ]}}
 
 Rules:
-- Exactly 7 beats = 7 short sentences, told as a story: hook, tension, reveal, explanation, closing punch. 
+- Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever trick (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
 - "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
   English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
-- "image_prompt": the ONE main SUBJECT to draw for that beat, as a short noun phrase of 4-12 English words (e.g. "a happy cartoon octopus with three hearts", "an ancient stone bridge", "a glowing full moon"). A single physical thing, no scene, no background, no abstract ideas, no text, no real people, no violence. Use a different subject for each beat.
-- Scene fields: each beat is a tiny cartoon scene. Pick the "setting" that fits the story place (use the SAME setting for neighbouring beats of the same place), the "time" of day, a "camera" move, and 1-3 "cast" characters who ACT OUT / REACT to what the narrator says (surprised for a shock, think for a puzzle, cheer for success, point when something is shown, sad for a failure). Vary slots, roles, expressions and actions between beats; at most one "walk_in" per beat. "fx": exclamation for a surprise, question for a mystery, sparkles/stars for a wonder, hearts for love, sweat for worry, otherwise none.
+- "image_prompt": the ONE main SUBJECT to draw for that beat, as a short noun phrase of 4-12 English words (e.g. "a big wooden horse on wheels", "a bull with a burning torch tied to its horns", "a mountain fort", "a war elephant", "a rolled treasure map"). Kid-friendly cartoon, no blood, no wounded people, no real people. A single physical thing, no scene, no background, no abstract ideas, no text, no real people, no violence. Use a different subject for each beat.
+- Scene fields: each beat is a tiny cartoon scene. Pick the "setting" that fits the battlefield or place (mountains for forts and hills, village, desert, ocean for ships, city for walled cities); the people on screen are soldiers, kings, commanders (use king), strategists (use elder) and villagers; pick the "setting" (use the SAME setting for neighbouring beats of the same place), the "time" of day, a "camera" move, and 1-3 "cast" characters who ACT OUT / REACT to what the narrator says (surprised for a shock, think for a puzzle, cheer for success, point when something is shown, sad for a failure). Vary slots, roles, expressions and actions between beats; at most one "walk_in" per beat. "fx": exclamation for a surprise, question for a mystery, sparkles/stars for a wonder, hearts for love, sweat for worry, otherwise none.
 - "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
