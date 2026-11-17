@@ -10,6 +10,7 @@ await new Promise(r => srv.on('listening', r));
 const b = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const pg = await b.newPage({ viewport: { width: 1080, height: 1920 } });
 pg.on('console', m => console.log('PAGE', m.text())); pg.on('pageerror', e => console.log('ERR', e.message));
+if (process.env.STORYBOARD) { const sb = JSON.parse(fs.readFileSync(process.env.STORYBOARD, 'utf8')); await pg.addInitScript((s) => { window.__STORYBOARD__ = s; }, sb); }
 await pg.goto(`http://localhost:${srv.address().port}/index.html${process.env.HASH||""}`);
 await pg.waitForFunction(() => window.ready || window.err, null, { timeout: 180000 });
 if (await pg.evaluate(() => window.err)) { console.log('page error'); process.exit(1); }
