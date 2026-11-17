@@ -2868,3 +2868,23 @@ export const UNIFORMS = {
   uk_ww2: { tunic: "#7b6f4a", skin: "#f3d6bb", helmet: true, helm: "ww2", helmCol: "#6c7358", armor: false, armorKind: "uniform", weapon: "rifle" },
   officer: { tunic: "#2f3a5a", skin: "#f3d6bb", helmet: true, helm: "peaked", helmCol: "#2f3a5a", armor: false, armorKind: "uniform", weapon: "sword", strapCol: "#7a4a2a" },
 };
+
+// ---- teams: the two sides of a battle get clearly different colours ----
+export const TEAMCOL = { A: "#2f6fb0", B: "#c2432f", C: "#4c9a4a" };
+export const UNIFORMS_EXTRA = { villager: OUTFITS.civA, villager2: OUTFITS.civB, elder: OUTFITS.toga };
+export const teamed = (id, team) => {
+  const base = UNIFORMS[id] || UNIFORMS_EXTRA[id] || UNIFORMS.roman, o = { ...base }, col = TEAMCOL[team];
+  if (col && UNIFORMS[id] && id !== "roman") { o.tunic = col; if (o.shieldCol) o.shieldCol = col; o.plume = col; o.flag = col; if (o.armorKind === "uniform" || o.helm === "peaked") o.helmCol = mul(col, [0.7, 0.7, 0.7]); }
+  else if (col && id === "roman") { o.tunic = col; }
+  return o;
+};
+
+// ---- attention marks drawn as cards ----
+const rr = (x0, y0, x1, y1, r) => rrect(x0, y0, x1, y1, r);
+export const fxMark = (p, kind, t) => {
+  const e = Math.min(1, t * 3), s = 0.4 + 0.6 * (1 - Math.pow(1 - e, 3)) + 0.06 * Math.sin(t * 20);
+  p.g.save(); p.g.translate(300, 520); p.g.scale(s, s); p.g.translate(-300, -520);
+  if (kind === "!") { p.poly(rr(262, 260, 338, 560, 24), "#e0302a", 14); p.ell(300, 650, 44, 44, "#e0302a", 14); }
+  else { const arc = ellPts(300, 390, 88, 84, 150, 420, 0, 30); const pts = [...arc, [300, 520], [300, 556]]; p.stroke(pts, 66, INK); p.stroke(pts, 40, "#ffd94a"); p.ell(300, 650, 40, 40, "#ffd94a", 14); }
+  p.g.restore();
+};
