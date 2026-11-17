@@ -68,7 +68,7 @@ export const romanFront = (p, key, opts = {}) => {
   const torsoBot = sole - legsL * HH - bob * HH, chin = torsoBot - torsoL * HH, hc = chin - H.b, hipY = torsoBot - 0.12 * HH;
   const thick = thickAngle(light), ow = 5 * u, cx = 300;
   const legCol = mix(O.tunic, INK, 0.62), armCol = mix(O.tunic, INK, 0.5);
-  const helmet = !!O.helmet && !nohelmet, old = O.helmet === "old";
+  const helmet = !!O.helmet && !nohelmet, old = O.helmet === "old", hk = O.helm || "roman";
   p.rot = null;
   // ---- cape behind everything ----
   if (O.cape) {
@@ -94,6 +94,7 @@ export const romanFront = (p, key, opts = {}) => {
   const arm = (side, pose) => {
     const s = S(side), X = (k) => tcx + side * (T.a * 1.1 + k * u);
     switch (pose) {
+      case "hold": return { pts: [s, [X(16), s[1] + 0.28 * HH], [X(22), s[1] + 0.02 * HH]], front: false };
       case "spear": return { pts: [s, [X(6), s[1] + 0.42 * HH], [X(10), s[1] + 0.2 * HH]], front: false };
       case "point": return { pts: [s, [X(28), s[1] - 0.02 * HH], [X(62), s[1] - 0.1 * HH]], front: false, finger: true };
       case "up": return { pts: [s, [X(14), s[1] - 0.3 * HH], [X(22), s[1] - 0.75 * HH]], front: false };
@@ -126,6 +127,7 @@ export const romanFront = (p, key, opts = {}) => {
     p.poly(tip, old ? "#8b7c6a" : "#c9cfd6", 2 * u);
     if (web) cobweb(p, s1[0] - 2 * u, s1[1] + 60 * u, 70 * u, u);
   }
+  if (O.weapon && O.weapon !== "spear" && R === "hold") { const [hx, hy] = arms[1].pts[2]; drawWeapon(p, O.weapon, hx, hy, u, O); }
   for (const a of arms) if (!a.front) drawArm(a);
   // torso
   if (dress) {
@@ -141,7 +143,8 @@ export const romanFront = (p, key, opts = {}) => {
   }
   p.gradFill(tp, O.tunic, mul(O.tunic, SH_CLOTH), light);
   p.clip(tp, () => {
-    if (O.armor) {
+    if (O.armorKind && ARMOR_BODY[O.armorKind]) ARMOR_BODY[O.armorKind]({ p, tcx, T, chin, torsoBot, HH, u, O, light });
+    else if (O.armor) {
       const top = chin - 0.1 * HH, bot = torsoBot - 0.25 * HH, n = 5;
       for (let i = 0; i < n; i++) {
         const y0 = top + (bot - top) * i / n, y1 = top + (bot - top) * (i + 1) / n;
@@ -159,14 +162,15 @@ export const romanFront = (p, key, opts = {}) => {
     }
   });
   p.inkRing(tp, ow, thick);
-  if (O.armor) for (const s of [-1, 1]) { // shoulder plates
+  if (O.armor && (!O.armorKind || O.armorKind === "lamellar" || O.armorKind === "plate")) for (const s of [-1, 1]) { // shoulder plates
     const sp = ellPts(tcx + s * 0.72 * T.a, chin + 0.1 * HH, 0.42 * T.a, 0.13 * HH, 180, 360, s * 8, 20);
     p.poly(sp, old ? "#9a9384" : "#c5ccd3", 1.8 * u);
   }
   if (O.moss) {/* reserved */}
   for (const a of arms) if (a.front) drawArm(a);
   // shield in front, held by the left hand
-  if (O.shield && L === "shield") {
+  if (O.shield && L === "shield" && O.shieldKind && O.shieldKind !== "roman") { const sx = tcx - 0.55 * T.a, sy = torsoBot + 0.05 * HH, sw = 0.36 * W, sh = 0.78 * HH; drawShield(p, O.shieldKind, sx, sy, sw, sh, u, ow, thick, light, O); }
+  else if (O.shield && L === "shield") {
     const sx = tcx - 0.55 * T.a, sy = torsoBot + 0.05 * HH, sw = 0.36 * W, sh = 0.78 * HH;
     const sp = rrect(sx - sw, sy - sh, sx + sw, sy + sh, 8 * u);
     p.gradFill(sp, "#c0302c", "#7d1d22", light);
@@ -183,12 +187,14 @@ export const romanFront = (p, key, opts = {}) => {
   const [cpx, cpy] = rotAbout([cx, chin], rad(tilt), [cx, hipY]);
   const Ah = tilt + headTilt;
   p.rot = Ah ? [rad(Ah), cx, chin, cpx - cx, cpy - chin] : null;
-  if (helmet) galea(p, H, cx, hc, light, thick, ow, old, u);
+  const hctx = { p, H, cx, hc, light, thick, ow, u, O, cheeks: () => cheeks(p, H, cx, hc, light, ow, false, u) };
+  if (helmet && hk === "roman") galea(p, H, cx, hc, light, thick, ow, old, u); else if (helmet && HELM_BACK[hk]) HELM_BACK[hk](hctx);
   const hp = blobPts(cx, hc, H);
   if (O.hair && !helmet) { const hb = blobPts(cx, hc - 0.03 * HH, { ...H, a: H.a * 1.04, b: H.b * 1.05 }); p.poly(hb, O.hair, 0); }
   p.shadedFill(hp, skin, mul(skin, SH_SKIN), light, H.a);
   p.inkRing(hp, ow, thick);
-  if (helmet) {
+  if (helmet && hk !== "roman") { if (HELM_FRONT[hk]) HELM_FRONT[hk](hctx); }
+  else if (helmet) {
     const bandY = hc - H.b * 0.42, bp = ellPts(cx, bandY, H.a * 1.05, H.b * 0.66, 180, 360, 0, 48);
     p.shadedFill(bp, old ? "#8f8a7e" : STEEL, mul(old ? "#8f8a7e" : STEEL, [0.62, 0.64, 0.72]), light, H.a, 0.4);
     p.clip(bp, () => { p.stroke(ellPts(cx - 20 * u, bandY - 0.3 * H.b, 0.25 * H.a, 0.18 * H.b, 200, 300, 0, 16), 5 * u, "#ffffff66");
