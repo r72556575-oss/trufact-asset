@@ -46,7 +46,7 @@ const widthAt = (pos, look, fov) => 2 * Math.hypot(pos[0] - look[0], pos[1] - lo
 export const camAt = (f) => {
   const S = shotAt(f), b = S.beat, K = CAMS[b.camera] || CAMS.medium, p = smooth((f - S.a) / Math.max(1, S.b - S.a));
   let c = { pos: lerp3(K[0].pos, K[1].pos, p), look: lerp3(K[0].look, K[1].look, p), fov: lerp(K[0].fov, K[1].fov, p), roll: 0 };
-  const zs = (b.actors || []).map((a) => SLOT_Z[a.slot] ?? 0);
+  const zs = (b.actors || []).map((a) => -(SLOT_Z[a.slot] ?? 0));
   if (zs.length && b.camera !== "pull" && b.camera !== "pan_l" && b.camera !== "pan_r") {      // pull the camera back until everybody fits
     const zc = (Math.min(...zs) + Math.max(...zs)) / 2, need = (Math.max(...zs) - Math.min(...zs)) + 1.5, k = Math.max(1, need / widthAt(c.pos, c.look, c.fov));
     c.pos = [c.look[0] + (c.pos[0] - c.look[0]) * k, c.pos[1] + (k - 1) * 0.5, c.pos[2] * (b.camera === "wide" ? 1 : k) + zc]; c.look = [c.look[0], c.look[1], c.look[2] + zc];
@@ -76,10 +76,10 @@ export const actorsAt = (f, T) => {
       command: { L: "hip", R: "point" }, cross: { L: "cross", R: "cross" }, wave: { L: ready.L, R: "wave" }, thumb: { L: "hang", R: "thumb" },
       talk: { L: "belly", R: (Math.floor(f / 24) % 2 ? "point" : "lift") },
     }[pose] || ready;
-    let z = (SLOT_Z[a.slot] ?? 0), step = 0;
+    const sx = SLOT_Z[a.slot] ?? 0; let z = -sx, step = 0;
     if (a.enter && a.enter.startsWith("walk")) { const e = smooth(d / 40); z += (1 - e) * (a.enter === "walk_left" ? 3.4 : -3.4); step = (1 - e) > 0.001 ? q((d % 14) / 14) : 0; }
-    const look = clamp(-z * 0.3, -0.7, 0.7);
-    const o = { expr: a.expr || "smile", seed, L: P.L, R: P.R, blink: blinkAt(f, seed), look, bob: q(Math.abs(Math.sin((f + seed) * 0.45)) * 0.02, 3), step, facing: z > 0 ? -1 : 1 };
+    const look = clamp(-sx * 0.3, -0.7, 0.7);
+    const o = { expr: a.expr || "smile", seed, L: P.L, R: P.R, blink: blinkAt(f, seed), look, bob: q(Math.abs(Math.sin((f + seed) * 0.45)) * 0.02, 3), step, facing: sx > 0 ? -1 : 1 };
     out.push({ key: (a.uniform || "roman") + (a.team || "A") + JSON.stringify(o), draw: (p) => T.romanFront(p, O, o), x: SOL[0] + (a.row === "back" ? -1.1 : a.row === "front" ? 0.9 : 0), y: SOL[1], z, order: 3, tint: b.light === "golden" ? "#ffe2c8" : "#ffffff" });
   });
   return out;
@@ -88,7 +88,7 @@ export const actorsAt = (f, T) => {
 // ---- fx ----
 const FX = (key, draw, pos, s, extra = {}) => ({ key, draw, x: pos[0], y: pos[1], z: pos[2], s, blob: false, shadow: false, order: 5, ...extra });
 export const fxAt = (f, T) => {
-  const S = shotAt(f), b = S.beat, d = f - S.a, out = [], first = (b.actors || [])[0], z0 = first ? -(SLOT_Z[first.slot] ?? 0) : 0;      // fx cards use the mirrored z axis
+  const S = shotAt(f), b = S.beat, d = f - S.a, out = [], first = (b.actors || [])[0], z0 = first ? -(SLOT_Z[first.slot] ?? 0) : 0;      // same world z as the actor (slot 'left' = screen left = +z)
   for (const k of (b.fx || [])) {
     if (k === "exclaim" || k === "question") { if (d > 6 && d < 70) { const t = q(Math.min(1, (d - 6) / 12)); out.push(FX(k + t, (p) => T.fxMark(p, k === "exclaim" ? "!" : "?", t), [SOL[0], DECK + (b.fxy ?? 2.0), z0], b.fxs ?? 0.5)); } }
     else if (k === "stars") { const t = q(((d % 40) / 40)); out.push(FX("st" + t, (p) => T.fxStars(p, t), [SOL[0], DECK + 1.25, z0], 0.6)); }
