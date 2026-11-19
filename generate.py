@@ -9,7 +9,7 @@ import os, sys, json, math, base64, time, random, wave, subprocess, datetime, re
 import numpy as np
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-import toon, scenes
+import toon, scenes, kitpost
 
 # ----------------------------------------------------------------------------- config
 SR = 24000
@@ -192,11 +192,13 @@ Return JSON with this exact shape:
 {{"title": "<English title, max 60 chars, curiosity-driven, no clickbait lies>",
   "description": "<2-3 English sentences + 5 hashtags>",
   "tags": ["<8 short English tags>"],
-  "beats": [ {{"hindi": "...", "english": "...", "image_prompt": "...", "sfx": "whoosh|pop|none",
-               "setting": "village|city|mountains|ocean|desert|space|indoor", "time": "day|sunset|night",
-               "camera": "push_in|pull_back|pan_left|pan_right|shake|static",
-               "cast": [ {{"role": "boy|girl|scientist|elder|king|worker|explorer|soldier", "slot": "left|center|right", "expr": "neutral|happy|surprised|sad|angry|think|laugh", "action": "idle|talk|point|think|surprised|cheer|wave|sad|walk_in"}} ],
-               "fx": "none|sparkles|exclamation|question|sweat|hearts|stars"}} ]}}
+  "beats": [ {{"hindi": "...", "english": "...", "sfx": "whoosh|pop|none", "light": "day|golden|night|fog",
+               "camera": "medium|close|two|wide|pull|low|pan_l|pan_r|push",
+               "actors": [ {{"uniform": "roman|knight|samurai|indian|mongol|chinese|us_ww2|jp_ww2|uk_ww2|officer|villager|elder", "team": "A|B",
+                             "slot": "far_left|left|center|right|far_right", "expr": "neutral|stern|stubborn|nervous|shock|squint|grin|smile|laugh",
+                             "pose": "idle|point|cheer|think|worry|command|cross|wave|thumb|talk", "enter": "none|walk_left|walk_right"}} ],
+               "fx": ["exclaim|question|stars|dust|sweat"], "shake": false, "flash": false,
+               "panel": null }} ]}}
 
 Rules:
 - Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever trick (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
@@ -204,7 +206,8 @@ Rules:
   English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
 - "image_prompt": the ONE main SUBJECT to draw for that beat, as a short noun phrase of 4-12 English words (e.g. "a big wooden horse on wheels", "a bull with a burning torch tied to its horns", "a mountain fort", "a war elephant", "a rolled treasure map"). Kid-friendly cartoon, no blood, no wounded people, no real people. A single physical thing, no scene, no background, no abstract ideas, no text, no real people, no violence. Use a different subject for each beat.
-- Scene fields: each beat is a tiny cartoon scene. Pick the "setting" that fits the battlefield or place (mountains for forts and hills, village, desert, ocean for ships, city for walled cities); the people on screen are soldiers, kings, commanders (use king), strategists (use elder) and villagers; pick the "setting" (use the SAME setting for neighbouring beats of the same place), the "time" of day, a "camera" move, and 1-3 "cast" characters who ACT OUT / REACT to what the narrator says (surprised for a shock, think for a puzzle, cheer for success, point when something is shown, sad for a failure). Vary slots, roles, expressions and actions between beats; at most one "walk_in" per beat. "fx": exclamation for a surprise, question for a mystery, sparkles/stars for a wonder, hearts for love, sweat for worry, otherwise none.
+- Each beat is a short cartoon SCENE in which soldiers ACT OUT what the narrator says, like a silent-film reenactment. Team A = the clever, weaker side (the heroes); team B = their opponents. Choose each uniform by the real nationality and era of that side: roman (ancient Rome/Greece/Mediterranean), knight (medieval Europe, crusaders), samurai (feudal Japan), indian (Indian kingdoms: Rajput, Maratha, Ahom, Sikh, Maurya...), mongol (Mongols, Mughals, Turks, Persians, Central Asia), chinese (ancient China, Korea, Vietnam), us_ww2 / jp_ww2 / uk_ww2 (World War II), officer (generals and officers of the 1700s-1900s, or any commander), villager / elder (civilians and advisers such as Chanakya). 1-4 actors per beat; show the heroes in most beats and the opponents when they matter; put the two sides on opposite slots (heroes left, opponents right). Reactions: shock/nervous for the surprised enemy when the trick works, laugh/grin with pose cheer for the heroes' win, squint with think or command while planning. At most one actor per beat uses "enter". Camera: wide for armies, close for one thinker, two for a face-off, pull for the opening beat, low for heroic moments, medium otherwise. Lighting: night for an ambush, fog for a surprise, golden for victory, day otherwise. fx: exclaim when the trick is revealed, question for a puzzle, stars for the win, dust for a charge, sweat for fear. Set "shake" true on the beat where the trick bursts into action and "flash" true on the final victory beat.
+- "panel": on at most 3 beats (the plan, the trick, the result) give {{"picture": "one clear drawable thing, 6-14 English words, kid-friendly cartoon, no blood", "tag": "THE TRICK"}} (tag = 2-3 words, upper case); those beats must use camera medium, two or wide. All other beats: null.
 - "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
@@ -213,7 +216,7 @@ Rules:
                                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8}})
         try:
             s = json.loads(re.sub(r"^```json|```$", "", text_of(resp).strip(), flags=re.M).strip())
-            assert len(s["beats"]) == 7 and all(b["hindi"] and b["english"] and b["image_prompt"] for b in s["beats"])
+            assert len(s["beats"]) == 7 and all(b["hindi"] and b["english"] and b.get("actors") for b in s["beats"])
             assert re.search(r"[\u0900-\u097F]", s["beats"][0]["hindi"])
             return s
         except Exception as e:
@@ -221,25 +224,20 @@ Rules:
     raise RuntimeError(f"script generation failed: {last}")
 
 def offline_script():
-    H7 = ["रोमन इमारतें दो हज़ार साल बाद भी खड़ी हैं।", "जबकि आज का कंक्रीट, कुछ ही दशकों में टूटने लगता है।",
-          "तो रोमनों का राज़ क्या था? वैज्ञानिकों ने दो हज़ार तेईस में इसका पता लगाया।",
-          "रोमन लोग कंक्रीट में क्विकलाइम मिलाते थे, जो मिलाते समय गरम हो जाता है।",
-          "इससे कंक्रीट के अंदर, छोटे छोटे सफ़ेद टुकड़े बन गए।",
-          "जब दरार पड़ती है, तो पानी उन टुकड़ों तक पहुँचता है, वे घुलते हैं, और दरार को भर देते हैं।",
-          "यानी कंक्रीट अपनी मरम्मत ख़ुद कर लेता है!"]
-    E7 = ["Roman buildings are still standing after 2,000 years.", "Modern concrete can start crumbling in just decades.",
-          "So what was the Romans' secret? Scientists found it in 2023.", "They mixed in quicklime, which heats up as it's mixed.",
-          "That left tiny white chunks hidden inside.", "When a crack forms, water reaches those chunks, and they dissolve and fill the crack.",
-          "The concrete literally repairs itself!"]
-    SC = [dict(setting="village", time="day", camera="push_in", fx="sparkles", cast=[dict(role="elder", slot="left", expr="happy", action="talk"), dict(role="boy", slot="right", expr="surprised", action="point")]),
-          dict(setting="city", time="sunset", camera="pan_left", fx="sweat", cast=[dict(role="worker", slot="center", expr="sad", action="sad")]),
-          dict(setting="indoor", time="day", camera="pull_back", fx="question", cast=[dict(role="scientist", slot="left", expr="think", action="think"), dict(role="girl", slot="right", expr="neutral", action="idle")]),
-          dict(setting="indoor", time="day", camera="push_in", fx="exclamation", cast=[dict(role="king", slot="center", expr="surprised", action="surprised")]),
-          dict(setting="mountains", time="day", camera="pan_right", fx="none", cast=[dict(role="explorer", slot="left", expr="happy", action="walk_in"), dict(role="girl", slot="center", expr="happy", action="wave")]),
-          dict(setting="ocean", time="sunset", camera="shake", fx="hearts", cast=[dict(role="boy", slot="center", expr="laugh", action="cheer")]),
-          dict(setting="space", time="night", camera="pull_back", fx="stars", cast=[dict(role="scientist", slot="left", expr="laugh", action="cheer"), dict(role="worker", slot="right", expr="happy", action="cheer")])]
-    return {"title": "Romans' Concrete HEALS ITSELF", "description": "Test.", "tags": ["test"],
-            "beats": [dict(hindi=h, english=e, image_prompt=e, sfx="pop" if i in (2, 3) else "whoosh", **SC[i]) for i, (h, e) in enumerate(zip(H7, E7))]}
+    H7 = ["सन् सोलह सौ इकहत्तर में, मुग़लों की विशाल सेना असम पर चढ़ आई।", "लाचित बरफूकन के पास सैनिक कम थे।", "उन्होंने नदी के किनारे रातों-रात मिट्टी की दीवार खड़ी करवाई।",
+          "दुश्मन को लगा कि यहाँ से रास्ता खुला है।", "उनका बेड़ा तंग नदी में फँस गया।", "तब असम की नावों ने चारों ओर से हमला कर दिया।", "इस तरह चालाकी ने बड़ी सेना को हरा दिया!"]
+    E7 = ["In 1671 a huge Mughal army marched on Assam.", "Lachit Borphukan had far fewer soldiers.", "So he built a mud wall by the river overnight.",
+          "The enemy thought the way was open.", "Their fleet got trapped in the narrow river.", "Then Assam's boats attacked from every side.", "Cleverness beat a giant army!"]
+    A = lambda u, slot, expr="smile", pose="idle", **k: dict(uniform=u, team="A", slot=slot, expr=expr, pose=pose, **k)
+    B = lambda u, slot, expr="stern", pose="idle", **k: dict(uniform=u, team="B", slot=slot, expr=expr, pose=pose, **k)
+    SC = [dict(camera="pull", light="day", actors=[B("mongol", "right", "stern", "ready"), B("mongol", "far_right", "grin", "ready")], fx=["dust"], panel=None),
+          dict(camera="two", light="day", actors=[A("indian", "left", "nervous", "worry"), B("mongol", "right", "grin", "cross")], fx=["sweat"], panel=None),
+          dict(camera="medium", light="night", actors=[A("indian", "center", "squint", "command")], fx=["exclaim"], panel={"picture": "a long mud wall beside a river", "tag": "THE TRICK"}),
+          dict(camera="wide", light="fog", actors=[A("indian", "far_left", "grin", "ready"), A("indian", "left", "grin", "ready"), B("mongol", "right", "shock", "worry"), B("mongol", "far_right", "shock", "worry")], fx=["question"], panel=None),
+          dict(camera="two", light="fog", actors=[A("officer", "left", "smile", "point"), B("mongol", "right", "shock", "worry")], fx=["sweat"], panel=None),
+          dict(camera="wide", light="golden", actors=[A("indian", "left", "laugh", "cheer"), A("indian", "center", "laugh", "cheer"), B("mongol", "right", "nervous", "worry")], fx=["dust"], shake=True, panel=None),
+          dict(camera="low", light="golden", actors=[A("indian", "center", "laugh", "cheer")], fx=["stars"], flash=True, panel={"picture": "a happy cartoon warrior holding a flag on a boat", "tag": "VICTORY"})]
+    return {"title": "How a Mud Wall Stopped an Empire", "description": "Test.", "tags": ["test"], "beats": [dict(hindi=h, english=e, sfx="pop" if i == 0 else "whoosh", **SC[i]) for i, (h, e) in enumerate(zip(H7, E7))]}
 
 # ----------------------------------------------------------------------------- 2. voice
 def read_wav(path):
@@ -582,9 +580,10 @@ def main():
     log("TITLE:", script["title"])
     if os.environ.get("ANALYZE_ONLY") == "1":
         log("BEATS:", json.dumps([b["english"] for b in script["beats"]], ensure_ascii=False)); log("analysis only: stopping before the video"); return
-    cta = {"hindi": "ऐसे ही हैरान करने वाले फैक्ट्स के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new fact every day!",
-           "image_prompt": "", "sfx": "ding", "brand": True, "setting": "indoor", "time": "day", "camera": "push_in", "fx": "sparkles",
-           "cast": [{"role": "boy", "slot": "left", "expr": "laugh", "action": "cheer"}, {"role": "girl", "slot": "right", "expr": "laugh", "action": "cheer"}]}
+    hero = next((x for bb in script["beats"] for x in bb.get("actors", []) if x.get("team", "A") == "A" and x.get("uniform") not in ("villager", "elder")), {"uniform": "roman"})["uniform"]
+    cta = {"hindi": "ऐसे ही हैरान करने वाली कहानियों के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new story every day!",
+           "sfx": "ding", "brand": True, "light": "golden", "camera": "medium", "fx": ["stars"], "flash": True,
+           "actors": [{"uniform": hero, "team": "A", "slot": "left", "expr": "laugh", "pose": "cheer"}, {"uniform": hero, "team": "A", "slot": "center", "expr": "laugh", "pose": "cheer"}, {"uniform": hero, "team": "A", "slot": "right", "expr": "laugh", "pose": "cheer"}], "panel": None}
     beats = script["beats"] + [cta]
     segs = build_voice(beats)
     speech_sec = [len(s) / SR for s in segs]
@@ -608,15 +607,26 @@ def main():
                [("pop", starts[i] + 0.05) for i in range(len(beats) - 1) if beats[i].get("sfx") == "pop"] + [("ding", starts[-1] + 0.05)]
     audio = mix_audio(durs, starts, segs, total, sfx_plan, seed=datetime.date.today().toordinal())
     write_wav(os.path.join(OUT, "audio.wav"), audio * 32767)
-    images = [get_image(b["image_prompt"], i) for i, b in enumerate(script["beats"])]
-    stickers = []
-    for i, im in enumerate(images):
-        if im is None: stickers.append(None); log(f"  picture {i+1}: none"); continue
-        st, kind = toon.sticker_or_card(im); stickers.append(st); log(f"  picture {i+1}: {kind}")
-    stickers.append(toon.cta_sticker(CHANNEL))
+    # ---- storyboard for the kit engine (frames are exact: voice timing -> frame ranges)
+    FPSK = 30; ntot = int(round(total * FPSK)); sb = []
+    for i, b in enumerate(beats):
+        a_ = int(round(starts[i] * FPSK)); e_ = ntot - 1 if i == len(beats) - 1 else int(round((starts[i] + durs[i]) * FPSK)) - 1
+        sb.append({"a": a_, "b": max(a_, e_), "light": b.get("light", "day"), "camera": b.get("camera", "medium"), "actors": b.get("actors", []), "fx": b.get("fx") or [],
+                   "shake": bool(b.get("shake")), "flash": bool(b.get("flash"))})
+    sbp = os.path.join(OUT, "storyboard.json"); json.dump({"fps": FPSK, "total": ntot, "beats": sb}, open(sbp, "w"), ensure_ascii=False)
+    # ---- panels: the picture of the trick, shown in a frame at the top
+    panels = {}
+    for i, b in enumerate(beats):
+        pn = b.get("panel")
+        if isinstance(pn, dict) and pn.get("picture"):
+            im = get_image(pn["picture"], i)
+            if im is not None: panels[i] = kitpost.make_panel(im, str(pn.get("tag") or "")[:18].upper()); log(f"  panel beat {i+1}: picture ok")
+            else: log(f"  panel beat {i+1}: no picture, scene runs without the panel")
     groups = []
     for i, b in enumerate(beats): groups += [dict(g, beat=i) for g in make_groups(i, b["english"], starts[i] + 0.02, starts[i] + b["speech"])]
-    scenes.render(os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), stickers, beats, starts, durs, total, groups, caption_img, number_of, brand_idx=len(beats) - 1)
+    engine = os.environ.get("ENGINE_DIR", "engine"); fdir = os.path.join(OUT, "frames"); kstep = int(os.environ.get("KIT_STEP", "2"))
+    kitpost.render_frames(engine, sbp, fdir, ntot, procs=int(os.environ.get("KIT_PROCS", "4")), step=kstep)
+    kitpost.compose(fdir, os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), ntot, kstep, sb, panels, groups, caption_img, len(beats) - 1, CHANNEL)
     log("rendered", os.path.join(OUT, "short.mp4"))
     if OFFLINE or os.environ.get("SKIP_UPLOAD") == "1": log("upload skipped"); return
     res = publish(os.path.join(OUT, "short.mp4"), script)
