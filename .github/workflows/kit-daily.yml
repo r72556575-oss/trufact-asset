@@ -1,6 +1,9 @@
 name: kit-daily
-# Roman-concrete style (2D cartoon soldiers in a 3D world). Manual runs only until the owner approves the first video.
+# Roman-concrete style (2D cartoon soldiers in a 3D world), war-jugaad stories.
+# 03:00 IST every day: build + upload as private with publishAt = 07:00 IST the same morning.
 on:
+  schedule:
+    - cron: "30 21 * * *"
   workflow_dispatch:
     inputs:
       skip_upload:
