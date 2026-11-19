@@ -1,0 +1,83 @@
+name: kit-daily
+# Roman-concrete style (2D cartoon soldiers in a 3D world). Manual runs only until the owner approves the first video.
+on:
+  workflow_dispatch:
+    inputs:
+      skip_upload:
+        description: "Test run: build the video but do NOT upload"
+        type: boolean
+        default: false
+      private_only:
+        description: "Test run: upload as private, no schedule, no notification"
+        type: boolean
+        default: true
+      analyze_only:
+        description: "Test run: only choose topic and write the story"
+        type: boolean
+        default: false
+      publish_at_ist:
+        description: "Publish time in IST, e.g. 2026-11-18T09:00 (empty = next 07:00 IST)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kit-daily
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: System packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Python packages
+        run: pip install -r requirements.txt
+      - name: Cartoon engine (Node, Playwright, three.js)
+        working-directory: engine
+        run: |
+          npm init -y >/dev/null
+          npm i playwright@1.49.1 three@0.160.0 >/dev/null 2>&1
+          mkdir -p web/lib && cp node_modules/three/build/three.module.js web/lib/
+          npx playwright install --with-deps chromium 2>&1 | tail -2
+      - name: Make the video and schedule it
+        shell: bash
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
+          PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
+          ANALYZE_ONLY: ${{ inputs.analyze_only && '1' || '0' }}
+          PUBLISH_AT_IST: ${{ inputs.publish_at_ist }}
+          ENGINE_DIR: engine
+          KIT_PROCS: "4"
+        run: |
+          ok=0
+          : > run.log
+          for i in 1 2; do
+            if python -u generate.py 2>&1 | tee -a run.log; then ok=1; break; fi
+            echo "attempt $i failed, retrying in 120 s" | tee -a run.log; sleep 120
+          done
+          test "$ok" = 1
+      - name: Save log, preview and topic history
+        if: always()
+        run: |
+          ffmpeg -y -loglevel error -i out/short.mp4 -vf "fps=1/5,scale=270:480,tile=9x1" -frames:v 1 preview.jpg || true
+          git config user.name "trufact-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add history.json run.log preview.jpg || git add history.json run.log
+          git diff --cached --quiet || (git commit -m "run log and topic history" && git pull --rebase -q && git push)
