@@ -193,7 +193,7 @@ def wiki_extract(title):
 def make_script(hist):
     today = datetime.date.today()
     cat = CATEGORIES[today.toordinal() % len(CATEGORIES)]
-    used = [t["title"] for t in hist["topics"][-80:]]
+    used = [t["title"] for t in hist["topics"][-80:]] + [t["wiki"] for t in hist["topics"][-80:] if t.get("wiki")]
     if OFFLINE: return offline_script()
     # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
     title, extract = None, None
@@ -212,6 +212,8 @@ def make_script(hist):
            "be a clear, well-sourced event where the clever trick or jugaad is documented in the article; be NEW (not in this used list: " + str(used) + "); "
            "be well known or at least exciting for Hindi-speaking youth; contain no graphic gore; avoid anything about religion-versus-religion conflict, "
            "modern politics or events after 1950. "
+           "NEVER pick a battle whose story is already uploaded, even under a different name: compare against ALL UPLOADED TITLES above (for example 'Mud Wall' = Battle of Saraighat, 'Sacred Cats' = Battle of Pelusium, "
+           "'Local Divers' = Battle of Colachel, 'Impossible Sea Battle' = Battle of Myeongnyang, 'Taj Mahal' = Taj Mahal). "
            "Return JSON: {\"niche\": \"...\", \"audience\": \"...\", \"why\": \"...\", \"wikipedia_titles\": [\"exact Wikipedia article title\", ...]} with the best story first.")
     cj = text_of(gemini_text({"contents": [{"parts": [{"text": ask}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9}}))
@@ -270,6 +272,7 @@ Rules:
             s = json.loads(re.sub(r"^```json|```$", "", text_of(resp).strip(), flags=re.M).strip())
             assert len(s["beats"]) == 7 and all(b["hindi"] and b["english"] and b.get("actors") for b in s["beats"])
             assert re.search(r"[\u0900-\u097F]", s["beats"][0]["hindi"])
+            s["wiki"] = title
             return s
         except Exception as e:
             last = e; log("  script invalid, retrying:", e)
@@ -700,7 +703,7 @@ def main():
     if OFFLINE or os.environ.get("SKIP_UPLOAD") == "1": log("upload skipped"); return
     res = publish(os.path.join(OUT, "short.mp4"), script)
     mv = re.search(r'"(?:id|videoId)"\s*:\s*"([A-Za-z0-9_-]{11})"', res or "")
-    hist["topics"].append({"date": str(datetime.date.today()), "title": script["title"], "video_id": mv.group(1) if mv else None, "hook": beats[0]["english"],
+    hist["topics"].append({"date": str(datetime.date.today()), "title": script["title"], "wiki": script.get("wiki"), "video_id": mv.group(1) if mv else None, "hook": beats[0]["english"],
                            "beats": [b["english"] for b in script["beats"]], "uniforms": sorted({a.get("uniform") for b in script["beats"] for a in b.get("actors", []) if a.get("uniform")}),
                            "panels": [b["panel"]["picture"] for b in script["beats"] if isinstance(b.get("panel"), dict)]}); hist["topics"] = hist["topics"][-300:]
     json.dump(hist, open(HIST, "w"), indent=1, ensure_ascii=False)
