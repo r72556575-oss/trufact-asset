@@ -26,11 +26,12 @@ TARGET_SEC = float(os.environ.get("TARGET_SEC", "45"))
 PUBLISH_HOUR_IST, PUBLISH_MIN_IST = 7, 0
 CHANNEL = "TruFact"
 # The owner's chosen story type: how the weaker side won a war with a clever trick ("jugaad") in olden times.
-STORY_BRIEF = ("true stories from old history (before 1950) where soldiers, kings or commanders who were OUTNUMBERED or weaker won a battle or war "
-               "through a clever trick, deception, local jugaad, smart use of terrain/animals/weather/tools. Examples of the kind of story: "
-               "Chanakya and Chandragupta's strategies, Shivaji Maharaj's guerrilla tactics, Lachit Borphukan at Saraighat, Maharana Pratap's Chetak and hill tactics, "
-               "Rani Durgavati, Porus vs Alexander, Raja Suhaldev, the Trojan Horse, Hannibal's fire-oxen trick, the Battle of Red Cliffs, Mongol feigned retreat, "
-               "Operation Mincemeat, the Ghost Army, Thermopylae and Marathon tactics, Zheng He, Admiral Yi Sun-sin's turtle ships")
+STORY_BRIEF = ("true stories from old history (before 1950) that are built around a ROUTE: a march, journey, voyage, escape, expedition, trade route or campaign across real geography, "
+               "the kind a history atlas explains with a line drawn across a map: a clear start place, 3-6 named places along the way, a destination, real dates, approximate distances, "
+               "and one number that adds up (km, days, soldiers, ships). A clever trick or jugaad on the way is welcome but not required. Examples of the kind of story: "
+               "Shivaji Maharaj's escape from Agra to Raigad, Gandhi's Dandi Salt March (about 390 km), Alexander's march to the Hydaspes, Chandragupta's campaign, Rajendra Chola's march to the Ganga, "
+               "Vasco da Gama's voyage to Calicut, Zheng He's voyages, Hannibal crossing the Alps, Napoleon's march to Moscow, Genghis Khan's campaign west, Marco Polo's journey, the Silk Road, "
+               "Magellan's circumnavigation, Lewis and Clark, Operation Mincemeat")
 CATEGORIES = ["Indian history"] * 7 + ["world history"] * 3             # 70 percent Indian stories, 30 percent world stories
 FONT_CANDS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
               "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"]
@@ -208,8 +209,8 @@ def make_script(hist):
            f"Today's region: {region}.\n"
            + (f"LEARNINGS FROM THE CHANNEL'S REAL NUMBERS (follow them when choosing): {learn}\n" if learn else "")
            + "Strongly prefer FAMOUS, relatable stories that many Indians already know or search for (Indian rulers and battles, Chanakya, Shivaji, Rani Lakshmibai, the Trojan Horse, Napoleon, Hannibal), because obscure foreign battles got very few views on this channel.\n"
-           "Suggest 10 English Wikipedia article titles (a battle, siege, campaign, operation or ruler/commander article) for stories of this type. Each must: "
-           "be a clear, well-sourced event where the clever trick or jugaad is documented in the article; be NEW (not in this used list: " + str(used) + "); "
+           "Suggest 10 English Wikipedia article titles (a march, journey, expedition, voyage, escape, campaign or trade-route article) for stories of this type. Each must: "
+           "be a clear, well-sourced event whose route, places, dates and distances are documented in the article; be NEW (not in this used list: " + str(used) + "); "
            "be well known or at least exciting for Hindi-speaking youth; contain no graphic gore; avoid anything about religion-versus-religion conflict, "
            "modern politics or events after 1950. "
            "NEVER pick a battle whose story is already uploaded, even under a different name: compare against ALL UPLOADED TITLES above (for example 'Mud Wall' = Battle of Saraighat, 'Sacred Cats' = Battle of Pelusium, "
@@ -232,7 +233,7 @@ def make_script(hist):
     if not extract: raise RuntimeError("no usable Wikipedia topic found")
     research = f"Wikipedia article '{title}':\n{extract[:7500]}"
     log("topic:", title, "| extract chars:", len(extract))
-    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}: a dramatic true war story about how the weaker side won with a clever trick (jugaad).
+    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}: a gripping true history story built around a ROUTE (a march, journey, voyage, escape or campaign across real places), told the way a history atlas would: where it started, the named places along the way with dates, the key obstacle, the clever move or turning point, and where it ended. Use real dates, place names and distances (say 'about' for estimates) and one number that adds up (km, days, soldiers or ships); never invent numbers.
 Use ONLY facts that are stated in this source text (do not add outside facts):
 {research}
 
@@ -255,7 +256,7 @@ Rules:
 - HOOK (beat 1, the first two seconds): open with the most shocking fact, the impossible odds, or a direct question, in at most 12 Hindi words. Never a greeting, never background first. Style example: तेरह नावें... और सामने एक सौ तैंतीस! फिर भी जीत किसकी हुई?
 - SUSPENSE BUILD-UP: beats 2 and 3 raise the stakes and the question "how can they possibly win?" and beat 3 ends on a mini-cliffhanger; hold the trick back until beat 4; beat 5 shows it working step by step; beat 6 is the payoff; beat 7 calls back to the hook. Every beat should end on something that makes the viewer need the next sentence.
 - VISUALS: every beat must look clearly different from the previous one (change camera, poses, expressions, fx); show the trick in a panel; use shock + exclaim at the reveal.
-- Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever trick (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
+- Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever move or turning point (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
 - "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
   English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
