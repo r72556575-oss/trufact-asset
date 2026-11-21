@@ -106,7 +106,7 @@ async def _channel_data():
         pl = await _yt_get(c, f"{base}/playlistItems", {"playlistId": up, "part": "contentDetails", "maxResults": "50"})
         ids = [i["contentDetails"]["videoId"] for i in pl.get("items", [])]
         vids = []
-        if ids: vids = (await _yt_get(c, f"{base}/videos", {"id": ",".join(ids), "part": "snippet,statistics,status"})).get("items", [])
+        if ids: vids = (await _yt_get(c, f"{base}/videos", {"id": ",".join(ids), "part": "snippet,statistics,status,contentDetails"})).get("items", [])
         skill = ""
         try:
             sr = await c.call_tool("get_zapier_skill", {"name": "upload to youtube"})
@@ -114,25 +114,66 @@ async def _channel_data():
         except Exception as e: log("  owner notes (skill) not read:", e)
     return item, vids, skill
 
+def _secs(iso):
+    m = re.match(r"PT(?:(\d+)M)?(?:(\d+)S)?", iso or "")
+    return (int(m.group(1) or 0) * 60 + int(m.group(2) or 0)) if m else 0
+
 def channel_profile():
-    """what the channel is about and which videos worked - used to choose the next topic"""
+    """what the channel is about and which videos worked -> (text, rows) or None"""
     if OFFLINE or not os.environ.get("ZAPIER_MCP_TOKEN"): return None
     try: item, vids, skill = asyncio.run(_channel_data())
     except Exception as e:
         log("  channel analysis unavailable:", e); return None
     sn, st = item.get("snippet", {}), item.get("statistics", {}); bd = item.get("brandingSettings", {}).get("channel", {})
-    rows = []
+    now = datetime.datetime.now(datetime.timezone.utc); rows = []
     for v in vids:
         s_, t_ = v["snippet"], v.get("statistics", {})
-        rows.append(dict(title=s_["title"], published=s_["publishedAt"][:10], views=int(t_.get("viewCount", 0)), likes=int(t_.get("likeCount", 0)),
-                         comments=int(t_.get("commentCount", 0)), privacy=v.get("status", {}).get("privacyStatus"), tags=(s_.get("tags") or [])[:6]))
-    public = sorted([r for r in rows if r["privacy"] != "private"], key=lambda r: -r["views"])
+        pub = datetime.datetime.fromisoformat(s_["publishedAt"].replace("Z", "+00:00")); age = max(0.3, (now - pub).total_seconds() / 86400)
+        views, likes = int(t_.get("viewCount", 0)), int(t_.get("likeCount", 0))
+        rows.append(dict(id=v["id"], title=s_["title"], published=s_["publishedAt"][:10], hour_ist=(pub + datetime.timedelta(hours=5, minutes=30)).hour, age_days=round(age, 1),
+                         views=views, views_per_day=round(views / age, 1), likes=likes, like_pct=round(100 * likes / views, 1) if views else 0, comments=int(t_.get("commentCount", 0)),
+                         seconds=_secs(v.get("contentDetails", {}).get("duration")), privacy=v.get("status", {}).get("privacyStatus"),
+                         title_language="hindi" if re.search(r"[\u0900-\u097F]", s_["title"]) else "english", has_emoji=bool(re.search(r"[\U0001F300-\U0001FAFF\u2600-\u27BF]", s_["title"])),
+                         has_custom_thumbnail=bool(v.get("contentDetails", {}).get("hasCustomThumbnail")), description_chars=len(s_.get("description", "")), tags=len(s_.get("tags") or [])))
+    public = sorted([r for r in rows if r["privacy"] == "public" and r["age_days"] >= 1.0], key=lambda r: -r["views"])
     text = (f"CHANNEL: {sn.get('title')} | {sn.get('description', '')[:400]} | keywords: {bd.get('keywords', '')} | subscribers: {st.get('subscriberCount')} "
-            f"| total views: {st.get('viewCount')} | video count: {st.get('videoCount')}\nPUBLIC VIDEOS, BEST FIRST: {json.dumps(public[:40], ensure_ascii=False)}\n"
+            f"| total views: {st.get('viewCount')} | video count: {st.get('videoCount')}\nPUBLIC VIDEOS (older than 1 day), BEST FIRST: {json.dumps(public[:40], ensure_ascii=False)}\n"
             f"ALL UPLOADED TITLES (never repeat): {json.dumps([r['title'] for r in rows], ensure_ascii=False)}")
     if skill: text += f"\nOWNER NOTES ABOUT THE CHANNEL IDEA:\n{skill}"
-    log("CHANNEL PROFILE:", text[:3500].replace("\n", " | "))
-    return text
+    log("CHANNEL PROFILE:", text[:2500].replace("\n", " | "))
+    return text, public
+
+COACH_FILE = "playbook.json"
+LEARN = ""
+
+def performance_coach(rows, hist):
+    """Reads every public video's numbers (and our own past scripts) and writes a playbook of concrete fixes for the next video."""
+    if not rows: return ""
+    ours = {t.get("video_id"): t for t in hist.get("topics", []) if t.get("video_id")}
+    data = []
+    for r in rows:
+        d = dict(r)
+        if r["id"] in ours: d["our_script"] = {"hook": ours[r["id"]].get("hook"), "beats": ours[r["id"]].get("beats"), "uniforms": ours[r["id"]].get("uniforms")}
+        data.append(d)
+    med = sorted(r["views"] for r in rows)[len(rows) // 2]
+    ask = (f"You are a YouTube Shorts growth coach for the Hindi channel {CHANNEL}. Below is the real data of every public video (views, views_per_day, likes, like_pct, duration in seconds, "
+           f"title language, emoji in title, custom thumbnail, hour published in IST). The channel median is {med} views. The owner wants to know which videos did NOT perform (for example under 50-100 views), "
+           "WHY, and what to improve in the next video: a stronger HOOK, a better suspense/story BUILD-UP, better VISUALS, better title and topic.\n"
+           f"DATA: {json.dumps(data, ensure_ascii=False)}\n\n"
+           "Compare the best and the worst videos honestly. Only state a pattern if the numbers support it; say when the data is too small. Note that retention (drop-off) data is NOT available, so judge the hook only from titles, topics, likes and length. "
+           "Return JSON: {\"weak_videos\": [{\"title\": \"\", \"views\": 0, \"likely_reasons\": [\"\"]}], \"what_works\": [\"\"], \"diagnosis\": {\"hook\": \"\", \"buildup\": \"\", \"visuals\": \"\", \"titles_topics\": \"\", \"other\": \"\"}, "
+           "\"playbook\": {\"hook_rules\": [\"5 concrete rules\"], \"buildup_rules\": [\"4 concrete rules\"], \"visual_rules\": [\"4 concrete rules\"], \"title_rules\": [\"4 concrete rules\"], \"topic_rules\": [\"3 concrete rules\"], \"avoid\": [\"\"]}}")
+    try:
+        txt = text_of(gemini_text({"contents": [{"parts": [{"text": ask}]}], "generationConfig": {"responseMimeType": "application/json", "temperature": 0.4}}))
+        pb = json.loads(re.sub(r"^```json|```$", "", txt.strip(), flags=re.M).strip())
+    except Exception as e:
+        log("  coach analysis unavailable:", e); return ""
+    try: json.dump({"date": str(datetime.date.today()), **pb}, open(COACH_FILE, "w"), indent=1, ensure_ascii=False)
+    except Exception: pass
+    log("COACH DIAGNOSIS:", json.dumps(pb.get("diagnosis"), ensure_ascii=False)[:1500]); log("COACH WEAK:", json.dumps(pb.get("weak_videos"), ensure_ascii=False)[:900])
+    p = pb.get("playbook") or {}
+    lines = [f"{k.replace('_', ' ').upper()}: " + " | ".join(map(str, v)) for k, v in p.items() if isinstance(v, list) and v]
+    return "\n".join(lines)
 
 # ----------------------------------------------------------------------------- 1. topic + script
 def load_history():
@@ -156,12 +197,17 @@ def make_script(hist):
     if OFFLINE: return offline_script()
     # step A: pick a topic that has a real Wikipedia article, then ground the script on that article only
     title, extract = None, None
-    profile = channel_profile()
+    global LEARN
+    prof = channel_profile(); profile, rows = (prof if prof else (None, []))
+    learn = performance_coach(rows, hist) if rows else ""
+    LEARN = learn
     region = "Indian history (India's kings, commanders and soldiers)" if cat == "Indian history" else "world history (any country)"
     ctx = (f"CHANNEL DATA (for tone and audience only):\n{profile}\n\n") if profile else ""
     ask = (f"You choose the next 45-second YouTube Shorts story for a Hindi channel.\n{ctx}"
            f"MANDATORY STORY TYPE: {STORY_BRIEF}.\n"
            f"Today's region: {region}.\n"
+           + (f"LEARNINGS FROM THE CHANNEL'S REAL NUMBERS (follow them when choosing): {learn}\n" if learn else "")
+           + "Strongly prefer FAMOUS, relatable stories that many Indians already know or search for (Indian rulers and battles, Chanakya, Shivaji, Rani Lakshmibai, the Trojan Horse, Napoleon, Hannibal), because obscure foreign battles got very few views on this channel.\n"
            "Suggest 10 English Wikipedia article titles (a battle, siege, campaign, operation or ruler/commander article) for stories of this type. Each must: "
            "be a clear, well-sourced event where the clever trick or jugaad is documented in the article; be NEW (not in this used list: " + str(used) + "); "
            "be well known or at least exciting for Hindi-speaking youth; contain no graphic gore; avoid anything about religion-versus-religion conflict, "
@@ -188,10 +234,13 @@ def make_script(hist):
 Use ONLY facts that are stated in this source text (do not add outside facts):
 {research}
 
+LEARNINGS FROM THIS CHANNEL'S REAL VIEW NUMBERS (apply them):
+{LEARN or 'none yet'}
+
 Return JSON with this exact shape:
-{{"title": "<English title, max 60 chars, curiosity-driven, no clickbait lies>",
-  "description": "<2-3 English sentences + 5 hashtags>",
-  "tags": ["<8 short English tags>"],
+{{"title": "<Hindi (Devanagari) or Hinglish title, max 60 chars, exactly ONE emoji, built like the best titles of this channel: a direct question or a shock plus a number or the impossible odds; do not reveal the trick; no clickbait lies>",
+  "description": "<2-3 Hindi sentences that tease the story and END WITH A QUESTION asking viewers to comment, then 5 hashtags including #Shorts>",
+  "tags": ["<10 short tags, mix of Hindi and English>"],
   "beats": [ {{"hindi": "...", "english": "...", "sfx": "whoosh|pop|none", "light": "day|golden|night|fog",
                "camera": "medium|close|two|wide|pull|low|pan_l|pan_r|push",
                "actors": [ {{"uniform": "roman|knight|samurai|indian|mongol|chinese|us_ww2|jp_ww2|uk_ww2|officer|villager|elder", "team": "A|B",
@@ -201,6 +250,9 @@ Return JSON with this exact shape:
                "panel": null }} ]}}
 
 Rules:
+- HOOK (beat 1, the first two seconds): open with the most shocking fact, the impossible odds, or a direct question, in at most 12 Hindi words. Never a greeting, never background first. Style example: तेरह नावें... और सामने एक सौ तैंतीस! फिर भी जीत किसकी हुई?
+- SUSPENSE BUILD-UP: beats 2 and 3 raise the stakes and the question "how can they possibly win?" and beat 3 ends on a mini-cliffhanger; hold the trick back until beat 4; beat 5 shows it working step by step; beat 6 is the payoff; beat 7 calls back to the hook. Every beat should end on something that makes the viewer need the next sentence.
+- VISUALS: every beat must look clearly different from the previous one (change camera, poses, expressions, fx); show the trick in a panel; use shock + exclaim at the reveal.
 - Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever trick (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
 - "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
   English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
@@ -365,6 +417,19 @@ def stub_subject(i):
     for ex in (290, 480): d.ellipse([ex - 48, 250 - 52, ex + 48, 250 + 52], fill=(255, 255, 255), outline=INK, width=8); d.ellipse([ex - 18, 250 - 20, ex + 18, 250 + 20], fill=INK)
     d.arc([300, 330, 470, 440], 15, 165, fill=INK, width=10)
     return im
+
+def check_picture(im, want):
+    """Ask Gemini to look at the picture: is the subject recognisable and is it clean? True when unsure."""
+    if OFFLINE or not GKEY: return True
+    try:
+        import io
+        buf = io.BytesIO(); im.convert("RGB").resize((512, 512)).save(buf, "JPEG", quality=80)
+        body = {"contents": [{"parts": [{"inlineData": {"mimeType": "image/jpeg", "data": base64.b64encode(buf.getvalue()).decode()}},
+                {"text": "This picture is meant to be a kid-friendly cartoon of: '" + want + "'. Reply as JSON {\"shows_subject\": true or false, \"clean\": true or false}. shows_subject = the main subject is clearly recognisable; clean = no deformed or garbled shapes, no letters or text, no gore."}]}],
+                "generationConfig": {"responseMimeType": "application/json"}}
+        r = json.loads(text_of(gemini_text(body))); ok = bool(r.get("shows_subject")) and bool(r.get("clean")); log("  picture check for", repr(want[:40]), r); return ok
+    except Exception as e:
+        log("  picture check skipped:", e); return True
 
 def get_image(prompt, i):
     global _gemini_img_ok
@@ -620,6 +685,10 @@ def main():
         pn = b.get("panel")
         if isinstance(pn, dict) and pn.get("picture"):
             im = get_image(pn["picture"], i)
+            if im is not None and not check_picture(im, pn["picture"]):
+                log(f"  panel beat {i+1}: picture not good enough, trying once more")
+                im2 = get_image(pn["picture"] + ", very simple, one clear object, centered, plain background", i)
+                im = im2 if (im2 is not None and check_picture(im2, pn["picture"])) else None
             if im is not None: panels[i] = kitpost.make_panel(im, str(pn.get("tag") or "")[:18].upper()); log(f"  panel beat {i+1}: picture ok")
             else: log(f"  panel beat {i+1}: no picture, scene runs without the panel")
     groups = []
@@ -630,7 +699,10 @@ def main():
     log("rendered", os.path.join(OUT, "short.mp4"))
     if OFFLINE or os.environ.get("SKIP_UPLOAD") == "1": log("upload skipped"); return
     res = publish(os.path.join(OUT, "short.mp4"), script)
-    hist["topics"].append({"date": str(datetime.date.today()), "title": script["title"]}); hist["topics"] = hist["topics"][-300:]
+    mv = re.search(r'"(?:id|videoId)"\s*:\s*"([A-Za-z0-9_-]{11})"', res or "")
+    hist["topics"].append({"date": str(datetime.date.today()), "title": script["title"], "video_id": mv.group(1) if mv else None, "hook": beats[0]["english"],
+                           "beats": [b["english"] for b in script["beats"]], "uniforms": sorted({a.get("uniform") for b in script["beats"] for a in b.get("actors", []) if a.get("uniform")}),
+                           "panels": [b["panel"]["picture"] for b in script["beats"] if isinstance(b.get("panel"), dict)]}); hist["topics"] = hist["topics"][-300:]
     json.dump(hist, open(HIST, "w"), indent=1, ensure_ascii=False)
     log("done")
 
