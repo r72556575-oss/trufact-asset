@@ -3,101 +3,128 @@
  "weak_videos": [
   {
    "title": "How Sacred Cats Won an Ancient Battle",
-   "views": 11,
+   "views": 13,
    "likely_reasons": [
-    "Lack of emojis in title reduces visual appeal in the feed",
-    "No custom thumbnail used",
-    "Topic is too niche for a general Hindi audience",
-    "English-only title on a predominantly Hindi-interest channel"
+    "Niche world history topic with zero emotional resonance or relevance for a Hindi-speaking general audience.",
+    "Plain English title without Hindi translation or punchy curiosity triggers.",
+    "Published very recently (under 2 days old), but initial traction completely stalled.",
+    "No custom thumbnail selected."
    ]
   },
   {
    "title": "The Impossible Sea Battle of Myeongnyang",
-   "views": 14,
+   "views": 17,
    "likely_reasons": [
-    "Obscure historical topic with low search/interest volume",
-    "Lack of custom thumbnail",
-    "Title is too academic and lacks a curiosity gap"
+    "Extremely obscure topic for Indian viewers; foreign name 'Myeongnyang' is difficult to read and search.",
+    "Completely English metadata on a channel whose breakout audience responds to Indian and Hindi geopolitical topics.",
+    "Only 1.5 days old, though initial browse/feed swipe-through rate is visibly near zero."
    ]
   },
   {
    "title": "The Incredible Power of the Mantis Shrimp",
    "views": 24,
    "likely_reasons": [
-    "Nature/Biology topics underperform compared to Geopolitics on this channel",
-    "No custom thumbnail",
-    "Title lacks a 'hook' or emotional trigger"
+    "Generic wildlife documentary angle; saturated and lacks an immediate personal hook.",
+    "No Hindi keywords, no emojis, no custom thumbnail.",
+    "Lacks immediate tension or stakes in the title."
    ]
   },
   {
    "title": "Photosynthesis Explained #shorts",
    "views": 28,
    "likely_reasons": [
-    "Too educational/academic for the Shorts algorithm",
-    "Title is a statement, not a question or a mystery",
-    "Lacks emojis to break up text"
+    "Reads like a school textbook syllabus topic ('Photosynthesis Explained') rather than entertaining, curiosity-driven content.",
+    "Zero mystery or shock value in the hook.",
+    "Completely blank description and zero tags to help the algorithm contextualize."
+   ]
+  },
+  {
+   "title": "Romans' Concrete HEALS ITSELF 🤯 #Shorts",
+   "views": 29,
+   "likely_reasons": [
+    "High like percentage (13.8%) indicates viewers who saw it liked it, but YouTube stopped testing it due to extremely low initial click/swipe interest.",
+    "English-only framing detached from the core Hindi demographic.",
+    "Published at 19:00 IST without a custom thumbnail."
    ]
   },
   {
    "title": "This Is How TATA Became India's Most Powerful Business Empire 🚀Description:",
    "views": 58,
    "likely_reasons": [
-    "Title formatting error (includes 'Description:') looks unprofessional",
-    "Despite high like percentage (5.2%), the hook failed to reach a wide audience",
-    "Topic is saturated; needs a more unique angle"
+    "Formatting error: Accidentally left 'Description:' inside the title, which looks amateur and damages click confidence.",
+    "Despite Tata being a relevant Indian brand, the upload was buried due to botched title execution and low initial velocity."
+   ]
+  },
+  {
+   "title": "How a Mud Wall Stopped an Empire",
+   "views": 59,
+   "likely_reasons": [
+    "Abstract and vague concept that fails to trigger urgency in the Shorts feed.",
+    "English title with zero Hindi cues, no thumbnail branding, and weak audience targeting."
+   ]
+  },
+  {
+   "title": "Secrets of the Burj Khalifa",
+   "views": 76,
+   "likely_reasons": [
+    "Overdone, saturated topic on YouTube with hundreds of existing viral Shorts.",
+    "Title lacks a unique angle or controversy (e.g., sewage system, hidden floor, or labor facts).",
+    "No custom thumbnail and plain English title."
    ]
   }
  ],
  "what_works": [
-  "India-centric content (Cities, War, Maritime boundaries) consistently exceeds the 1234 median",
-  "Geopolitical comparisons (India vs China, Top 5 Powerful Countries)",
-  "Hinglish titles (Hindi text + English keywords) with high-impact emojis like 😱, 🇮🇳, and 🔥",
-  "Listicles (Top 5, Top 3) provide a clear structure that aids retention",
-  "Custom thumbnails: 90% of videos above the median views utilize a custom thumbnail"
+  "Geopolitical power rankings and Indian pride themes consistently break 2,000 to 3,500 views (e.g., 'India's Highest-Earning Cities', 'दुनिया के Top 5 सबसे Powerful देश!').",
+  "Hindi or bilingual titles with dramatic emojis (😱, 🇮🇳, 🚀, 🔥) dominate the channel's top quintile.",
+  "Morning publication window between 06:00 and 09:00 IST correlates with the majority of top-tier videos (3,516, 3,330, 2,617, and 2,313 views were all published 06:00-09:00 IST).",
+  "Listicle formats and comparative showdowns ('Top 5', 'US vs North Korea', 'India-China') drive the highest view counts and comment rates.",
+  "Videos with custom thumbnails consistently hit the channel median or above, whereas non-thumbnailed recent uploads largely flopped below 100 views."
  ],
  "diagnosis": {
-  "hook": "Weak videos use 'Statement Titles' (e.g., Photosynthesis Explained) which fail to create a curiosity gap. Strong videos use 'Question/Challenge Hooks' (e.g., भारत किस नंबर पर है?).",
-  "buildup": "Videos around 45-50 seconds are performing best, suggesting the audience prefers a detailed narrative over very short 30-second clips, provided the topic is high-stakes.",
-  "visuals": "There is a direct correlation between the absence of custom thumbnails and sub-100 view counts. Visual metadata is being ignored on low-performing clips.",
-  "titles_topics": "The channel audience is highly motivated by National Pride and Global Power Dynamics. Scientific or niche biological facts (Mantis Shrimp, Photosynthesis) do not resonate with the current subscriber base.",
-  "other": "Publishing between 06:00 and 09:00 IST shows a cluster of high performers, while late afternoon/evening uploads have more variance."
+  "hook": "The top videos hook viewers using high-stakes curiosity or national relevance ('भारत किस नंबर पर है?', 'India's Highest-Earning Cities'), whereas the bottom videos open with dry academic titles ('Photosynthesis Explained') or obscure foreign history that gives the Hindi viewer zero reason not to swipe away in the first 2 seconds.",
+  "buildup": "High performers use comparative progression (rankings 5 to 1, or nation vs. nation tension) which naturally sustains retention. The bottom videos appear to be linear informational monologues that plateau quickly.",
+  "visuals": "The winning cluster overwhelmingly features active custom thumbnails and vibrant, identifiable national flags/symbols. The bottom 8 videos either skipped custom thumbnails entirely or relied on auto-selected frames of mud walls, shrimp, and concrete.",
+  "titles_topics": "There is a severe audience identity split: TruFact was built on Hindi/Hinglish geopolitical, military, and Indian economic curiosities. Recent uploads abruptly pivoted to English-titled biology lectures and Western/Asian ancient history, alienating the channel's core audience segment.",
+  "other": "Sample size caution: Some weak videos ('Battle of Myeongnyang', 'Sacred Cats') are under 3 days old, so their total numbers are not fully matured; however, their initial trajectory (under 20 views) proves that the algorithm found zero swipe-through interest from TruFact's subscriber base."
  },
  "playbook": {
   "hook_rules": [
-   "Start with a 'Did you know' or 'The secret of' framing",
-   "Use a curiosity gap: Mention a result but not the cause in the first 3 seconds",
-   "Always include at least two relevant emojis in the title",
-   "For Hindi content, use Hindi script for the emotional part of the hook",
-   "Address the viewer directly using 'Aap' or 'You'"
+   "Ask a direct question that challenges common knowledge in the first 2 seconds (e.g., 'क्या आप जानते हैं...?').",
+   "Anchor the hook to India or a globally recognizable superpower (India, USA, China, Russia) within the first frame.",
+   "Show a high-contrast visual shock or animated stat counter immediately on screen 0:00 to stop scrolling.",
+   "State the high-stakes outcome first, then promise the reveal at the end ('दुनिया का सबसे खतरनाक हथियार किसके पास है?').",
+   "Avoid slow channel introductions, logos, greetings, or text cards that take more than 0.5 seconds."
   ],
   "buildup_rules": [
-   "Use the 'Rule of 3': Present three facts leading up to the biggest revelation",
-   "Maintain a fast cut every 2-3 seconds to prevent scrolling",
-   "Use progress bars or 'Step 1, Step 2' overlays",
-   "Keep the duration between 40-55 seconds for maximum 'information density'"
+   "Use the countdown/rankings structure (e.g., Number 5 to Number 1) to build innate suspense.",
+   "Cut and transition visual assets every 1.5 to 2.5 seconds to maintain high visual pacing.",
+   "Incorporate rising background audio tension or rhythmic sound effects on every data point reveal.",
+   "Place the biggest reveal or plot twist at second 40+ to maximize completion rate and looped replays."
   ],
   "visual_rules": [
-   "Custom thumbnails are mandatory for every upload",
-   "Use high-contrast text (Yellow/Red) on thumbnails",
-   "Include a 'Shocked Face' or 'Comparison' image in the thumbnail",
-   "Ensure on-screen captions are large and centered to avoid UI overlap"
+   "Always set a custom thumbnail frame featuring large high-contrast Hindi text (maximum 3 words) and an emotional face or recognized flag.",
+   "Use bold, dual-colored subtitles (e.g., Yellow and White text with black stroke) centered in the readable Shorts safe zone.",
+   "Avoid static Wikipedia or Google images; use Ken Burns zoom pans, motion graphics, or map animations.",
+   "Color-grade clips with high saturation and contrast so they stand out in mobile feeds under varying brightness."
   ],
   "title_rules": [
-   "Mix Hindi and English (Hinglish) to capture both search and browse traffic",
-   "Keep titles under 60 characters to avoid truncation",
-   "Use 'Power Words' like Unbelievable, Mystery, Warning, or Powerful",
-   "Never leave 'Description:' or technical tags in the visible title"
+   "Write titles in Devnagari Hindi or mixed Hinglish—never 100% formal academic English on this channel.",
+   "Include at least one high-emotion emoji (😱, 🔥, 🇮🇳, ⚠️) to trigger immediate cognitive curiosity.",
+   "Keep titles under 55 characters so the punchline does not get truncated on mobile screens.",
+   "Double-check title metadata before publishing to prevent accidental copy-paste tags like 'Description:'."
   ],
   "topic_rules": [
-   "Focus 70% of content on Indian History, Geopolitics, and Achievements",
-   "Use 'Top 5' formats for general facts to increase 'completion rate' desire",
-   "Avoid purely academic/school-level science topics"
+   "Stick strictly to the core content pillars: Indian geopolitics, military defense, mega-infrastructure, and astonishing world records.",
+   "Filter every idea through the 'Dinner Table Test': Would an average Indian viewer share this fact with friends or family?",
+   "Avoid standard school-syllabus science topics (e.g., photosynthesis, cell division) unless framed as a bizarre conspiracy, mystery, or survival story."
   ],
   "avoid": [
-   "Uploading without a custom thumbnail",
-   "Generic titles that sound like a textbook chapter",
-   "Niche topics that don't have a 'Why this matters to you' angle",
-   "Long intros; get straight to the fact in under 1.5 seconds"
+   "Academic lecture titles ('Photosynthesis Explained', 'The Architecture of...').",
+   "Obscure foreign history with unpronounceable names ('Myeongnyang') with zero connection to Indian viewers.",
+   "Publishing without a verified custom thumbnail.",
+   "Pure English titles that alienate your primary Hindi Shorts recommendation feed.",
+   "Copy-pasting description text into title fields without proofreading.",
+   "Posting saturated facts without a contrarian or fresh angle."
   ]
  }
 }
