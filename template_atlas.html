@@ -1,0 +1,691 @@
+<meta charset="utf-8">
+<title>Low-Poly Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="fonts/fonts.css">
+<script src="lib/three.min.js"></script>
+<style>
+/* Layout: an editing-suite player. One dark look by choice: the stage, then the transport bar under it. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0b0d;
+  --panel: #141417;
+  --ink: #f2f0ea;
+  --dim: #8d8c93;
+  --line: #26262c;
+  --accent: #ffd60a;
+  --display: "Anton", "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 28px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 14px; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; }
+.name { font-family: var(--display); font-weight: 400; font-size: clamp(26px, 4vw, 40px); letter-spacing: 0.02em; text-transform: uppercase; margin: 0; line-height: 1; }
+.name em { font-family: var(--serif); font-style: italic; text-transform: none; color: var(--accent); letter-spacing: 0; font-size: 1.12em; }
+.meta { color: var(--dim); font-size: 14px; margin: 0; }
+.stage { position: relative; aspect-ratio: 720 / 1280; width: min(100%, calc(74vh * 720 / 1280)); max-width: 100%; margin-inline: auto; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.bar button, .bar label.btn {
+  font: 600 14px var(--body); color: var(--ink); background: transparent; border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.bar button:hover, .bar label.btn:hover { border-color: var(--dim); }
+.bar button:focus-visible, .bar label.btn:focus-within, #scrub:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar button[aria-pressed="true"] { background: var(--accent); color: #0b0b0d; border-color: var(--accent); }
+#play { min-width: 82px; justify-content: center; background: var(--ink); color: #0b0b0d; border-color: var(--ink); }
+#scrub { flex: 1 1 220px; min-width: 0; accent-color: var(--accent); }
+#time { font: 600 14px var(--body); font-variant-numeric: tabular-nums; color: var(--dim); min-width: 92px; text-align: right; }
+#vofile, #footfile { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.note { color: var(--dim); font-size: 13px; margin: 0; max-width: 70ch; }
+</style>
+
+
+<div class="wrap">
+  <div class="top">
+    <h1 class="name">Low-Poly <em>Atlas</em></h1>
+    <p class="meta">Reference animation · 15.0 s · 720×1280 · drawn in code, sound synthesized</p>
+  </div>
+  <div class="stage"><canvas id="stage" width="720" height="1280" aria-label="Low-Poly Atlas reference animation"></canvas></div>
+  <div class="bar">
+    <button id="play" type="button">Play</button>
+    <input id="scrub" type="range" min="0" max="15" step="0.01" value="0" aria-label="Scrub timeline">
+    <span id="time">0.00 / 15.00</span>
+    <button id="sound" type="button" aria-pressed="true">Sound on</button>
+    <button id="loop" type="button" aria-pressed="true">Loop</button>
+    <label class="btn" for="vofile">Load voiceover<input id="vofile" type="file" accept="audio/*"></label>
+  </div>
+  <p class="note" id="vonote">Load a voiceover to play it in sync. The effects switch to a lighter mix under narration.</p>
+</div>
+
+
+<script>window.__STORY__ = /*__STORY__*/null;</script>
+<script>
+// =====================================================================================================
+// LOW-POLY ATLAS  ·  core helpers (CM), sound kit (SFX), library helpers, style, player
+// Every frame is a pure function of t. All randomness is seeded. Times are seconds.
+// =====================================================================================================
+// =====================================================================================================
+const CM = (() => {
+  const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const span = (t, a, b) => clamp((t - a) / (b - a));
+  const rotl = (x, k) => (x << k) | (x >>> (32 - k));
+  const hash = (s) => { s = String(s); let h = 0x9e3779b1; for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 0x85ebca6b); h ^= h >>> 13; } return h >>> 0; };
+  // xoshiro128** style generator, seeded from a number or string
+  const rng = (seed) => {
+    const s = typeof seed === 'number' ? seed >>> 0 : hash(seed);
+    let a = (s ^ 0xa5a5a5a5) >>> 0, b = (Math.imul(s, 0x27d4eb2d) >>> 0) || 1, c = (0x165667b1 ^ s) >>> 0, d = (rotl(s, 7) >>> 0) || 7;
+    const r = () => { const res = Math.imul(rotl(Math.imul(b, 5), 7), 9) >>> 0; const t = b << 9; c ^= a; d ^= b; b ^= c; a ^= d; c ^= t; d = rotl(d, 11); return res / 4294967296; };
+    for (let i = 0; i < 8; i++) r();
+    r.in = (lo, hi) => lo + r() * (hi - lo);
+    r.pick = (arr) => arr[(r() * arr.length) | 0];
+    return r;
+  };
+  // smooth 1D value noise, roughly -1..1
+  const noise1 = (seed) => { const r = rng(seed), v = Float32Array.from({ length: 256 }, () => r() * 2 - 1); return (x) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return lerp(v[i & 255], v[(i + 1) & 255], u); }; };
+  const ez = {
+    out3: (u) => 1 - Math.pow(1 - u, 3),
+    in3: (u) => u * u * u,
+    inout3: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),
+    outExpo: (u) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * u)),
+    back: (u, s = 1.7) => (u <= 0 ? 0 : u >= 1 ? 1 : 1 + (s + 1) * Math.pow(u - 1, 3) + s * Math.pow(u - 1, 2)),
+    spring: (u) => (u <= 0 ? 0 : u >= 1 ? 1 : 1 - Math.exp(-6 * u) * Math.cos(13 * u)),
+  };
+  const layer = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  return { clamp, lerp, span, hash, rng, noise1, ez, layer };
+})();
+
+
+// =====================================================================================================
+// SFX: synthesized creator-edit sound kit. Plain Web Audio, no files.
+// voiceover mode keeps the music low under narration and plays sounds marked `soft` at 55%.
+// =====================================================================================================
+const SFX = (() => {
+  const SEMI = { C: -9, D: -7, E: -5, F: -4, G: -2, A: 0, B: 2 };
+  const hz = (n) => { if (typeof n === 'number') return n; const m = /^([A-G])(#|b)?(-?\d)$/.exec(n); return 440 * Math.pow(2, (SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + (+m[3] - 4) * 12) / 12); };
+
+
+  function kit(ac, o = {}) {
+    const VO = !!o.voiceover, SR = ac.sampleRate, T0 = o.from || 0, base = ac.currentTime + (o.lead || 0);
+    // snap every start a little past the sample grid (avoids level spikes on some browsers)
+    const at = (t) => (Math.round((base + (t - T0)) * SR) + 0.3) / SR;
+    const skip = (t, dur) => at(t) + dur < ac.currentTime || (t < T0 - 0.005 && dur < 1.2);
+
+
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 6; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.15;
+    const master = ac.createGain(); master.gain.value = o.master == null ? 0.85 : o.master;
+    comp.connect(master); master.connect(o.dest || ac.destination);
+    const mk = (g) => { const n = ac.createGain(); n.gain.value = g; n.connect(comp); return n; };
+    const bus = { fx: mk(VO ? 0.78 : 0.95), music: mk(VO ? 0.3 : 0.62), amb: mk(0.45) };
+    const duckIn = ac.createGain(); duckIn.connect(bus.music);
+    const DUCKS = [];
+
+
+    // generated plate-style reverb
+    const verb = ac.createConvolver();
+    { const n = Math.floor(1.5 * SR), ir = ac.createBuffer(2, n, SR);
+      for (let ch = 0; ch < 2; ch++) { const r = CM.rng('plate' + ch), d = ir.getChannelData(ch); let lp = 0; for (let i = 0; i < n; i++) { const u = i / n; lp += (0.7 - 0.5 * u) * ((r() * 2 - 1) - lp); d[i] = lp * Math.pow(1 - u, 2.6) * 0.9; } }
+      verb.buffer = ir; }
+    const verbIn = ac.createGain(); verbIn.gain.value = 0.8; verbIn.connect(verb); verb.connect(comp);
+
+
+    // seeded noise buffers
+    const NB = {};
+    { const n = Math.floor(2 * SR);
+      for (const kind of ['white', 'pink', 'brown']) {
+        const b = ac.createBuffer(1, n, SR), d = b.getChannelData(0), r = CM.rng('nz' + kind); let b0 = 0, b1 = 0, b2 = 0, br = 0;
+        for (let i = 0; i < n; i++) { const w = r() * 2 - 1;
+          if (kind === 'white') d[i] = w;
+          else if (kind === 'pink') { b0 = 0.99765 * b0 + w * 0.099; b1 = 0.963 * b1 + w * 0.2965; b2 = 0.57 * b2 + w * 1.0527; d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.18; }
+          else { br = (br + 0.02 * w) / 1.02; d[i] = br * 3.4; } }
+        NB[kind] = b; } }
+
+
+    const ramp = (param, v, t) => { if (!Array.isArray(v)) { param.setValueAtTime(v, t); return; } param.setValueAtTime(v[0][1], t + v[0][0]); for (let i = 1; i < v.length; i++) param.exponentialRampToValueAtTime(Math.max(1e-3, v[i][1]), t + v[i][0]); };
+    const env = (g, t, peak, dur, a = 0.004, hold = 0) => {
+      a = Math.min(a, dur * 0.9); hold = Math.min(hold, dur - a);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a);
+      if (hold > 0) g.gain.setValueAtTime(peak, t + a + hold);
+      g.gain.exponentialRampToValueAtTime(1e-4, t + dur); g.gain.setValueAtTime(0, t + dur + 0.002);
+    };
+    const level = (p, d) => (p.gain == null ? d : p.gain) * (VO && p.soft ? 0.55 : 1);
+    const route = (node, p, t) => {
+      const pan = ac.createStereoPanner();
+      if (Array.isArray(p.pan)) { pan.pan.setValueAtTime(p.pan[0], t); pan.pan.linearRampToValueAtTime(p.pan[1], t + (p.dur || 0.2)); } else pan.pan.value = CM.clamp(p.pan || 0, -1, 1);
+      node.connect(pan); pan.connect(p.bus === 'music' ? duckIn : bus[p.bus || 'fx']);
+      if (p.verb) { const s = ac.createGain(); s.gain.value = p.verb; pan.connect(s); s.connect(verbIn); }
+    };
+    const filt = (p, t) => { if (!p.filter) return null; const f = ac.createBiquadFilter(); f.type = p.filter; f.Q.value = p.q == null ? 0.9 : p.q; ramp(f.frequency, p.ff == null ? 1200 : p.ff, t); return f; };
+
+
+    // primitive: oscillator voice. f may be a value or [[dt, hz], ...]
+    function voice(time, p) {
+      const dur = p.dur || 0.2; if (skip(time, dur)) return; const t = at(time);
+      const osc = ac.createOscillator(); osc.type = p.type || 'sine';
+      ramp(osc.frequency, Array.isArray(p.f) ? p.f.map(([d, v]) => [d, hz(v)]) : hz(p.f || 440), t);
+      const g = ac.createGain(); env(g, t, level(p, 0.3), dur, p.a, p.hold);
+      const f = filt(p, t); if (f) { osc.connect(f); f.connect(g); } else osc.connect(g);
+      route(g, p, t); osc.start(t); osc.stop(t + dur + 0.03);
+    }
+    // primitive: noise voice
+    function hiss(time, p) {
+      const dur = p.dur || 0.2; if (skip(time, dur)) return; const t = at(time);
+      const src = ac.createBufferSource(); src.buffer = NB[p.color || 'white']; src.loop = true; if (p.rate) src.playbackRate.value = p.rate;
+      const g = ac.createGain(); env(g, t, level(p, 0.3), dur, p.a, p.hold);
+      const f = filt(p, t); if (f) { src.connect(f); f.connect(g); } else src.connect(g);
+      route(g, p, t); src.start(t, CM.rng('off' + time)() * 1.5); src.stop(t + dur + 0.03);
+    }
+    function duck(t, depth = 0.5, hold = 0.25) { DUCKS.push({ t, depth, hold }); }
+
+
+    // ---------------- named sounds (creator-edit palette) ----------------
+    const S = {
+      // text slam: a tight low thump with a short papery crack
+      slam: (t, o) => { voice(t, { f: [[0, 150], [0.12, 52]], dur: 0.2, gain: 0.42 * o.g, pan: o.pan, soft: o.soft }); hiss(t, { dur: 0.07, filter: 'lowpass', ff: 2600, gain: 0.22 * o.g, pan: o.pan, soft: o.soft }); hiss(t, { dur: 0.012, filter: 'highpass', ff: 5000, gain: 0.12 * o.g, pan: o.pan, soft: o.soft }); },
+      // big drop: sub boom with a dark tail
+      boom: (t, o) => { voice(t, { f: [[0, 90], [0.08, 52], [1.6, 34]], dur: 1.7, gain: 0.7 * o.g, a: 0.006, hold: 0.12 }); hiss(t, { color: 'brown', dur: 0.6, filter: 'lowpass', ff: [[0, 600], [0.5, 90]], gain: 0.35 * o.g, verb: 0.3 }); duck(t, 0.7, 0.35); },
+      pop: (t, o) => { const f = o.f || 760; voice(t, { f: [[0, f * 1.7], [0.05, f]], dur: 0.08, gain: 0.22 * o.g, pan: o.pan, soft: o.soft }); hiss(t, { dur: 0.01, filter: 'highpass', ff: 4500, gain: 0.08 * o.g, pan: o.pan, soft: o.soft }); },
+      tick: (t, o) => hiss(t, { dur: 0.016, filter: 'bandpass', ff: o.f || 3800, q: 3, gain: 0.32 * o.g, pan: o.pan, soft: o.soft }),
+      click: (t, o) => { hiss(t, { dur: 0.012, filter: 'bandpass', ff: 3200, q: 2, gain: 0.35 * o.g, pan: o.pan }); hiss(t + 0.045, { dur: 0.01, filter: 'bandpass', ff: 2400, q: 2, gain: 0.22 * o.g, pan: o.pan }); },
+      whoosh: (t, o) => { const d = o.dur || 0.35, dir = o.dir || 1; hiss(t, { color: 'pink', dur: d, filter: 'bandpass', ff: [[0, 260], [d * 0.55, o.top || 3200], [d, 520]], q: 0.75, gain: 0.5 * o.g, a: d * 0.55, pan: [-0.7 * dir, 0.7 * dir], verb: 0.12, soft: o.soft }); hiss(t + d * 0.2, { dur: d * 0.6, filter: 'highpass', ff: [[0, 3000], [d * 0.6, 7000]], gain: 0.08 * o.g, a: d * 0.3, pan: [-0.4 * dir, 0.5 * dir], soft: o.soft }); },
+      riser: (t, o) => { const d = o.dur || 0.8; hiss(t, { color: 'pink', dur: d, filter: 'bandpass', ff: [[0, 300], [d, 5200]], q: 1.1, gain: 0.32 * o.g, a: d * 0.96, verb: 0.2, soft: o.soft }); voice(t, { type: 'sawtooth', f: [[0, 110], [d, 440]], dur: d, gain: 0.06 * o.g, a: d * 0.95, filter: 'lowpass', ff: [[0, 400], [d, 2400]], soft: o.soft }); },
+      glitch: (t, o) => { const r = CM.rng('gl' + t); for (let i = 0; i < 9; i++) voice(t + i * 0.021, { type: 'square', f: 180 + r() * 2200, dur: 0.018, gain: 0.07 * o.g, a: 0.001, hold: 0.012, pan: r() * 1.4 - 0.7 }); hiss(t, { dur: 0.2, filter: 'bandpass', ff: [[0, 4000], [0.2, 900]], q: 0.7, gain: 0.18 * o.g }); hiss(t + 0.1, { dur: 0.05, color: 'brown', gain: 0.25 * o.g }); },
+      ping: (t, o) => { voice(t, { f: 'E6', dur: 0.5, gain: 0.16 * o.g, a: 0.003, verb: 0.3, pan: o.pan }); voice(t + 0.11, { f: 'B6', dur: 0.7, gain: 0.14 * o.g, a: 0.003, verb: 0.35, pan: o.pan }); },
+      send: (t, o) => { voice(t, { f: [[0, 520], [0.11, 1500]], dur: 0.13, gain: 0.14 * o.g, pan: o.pan }); hiss(t, { dur: 0.1, filter: 'highpass', ff: [[0, 2000], [0.1, 6000]], gain: 0.07 * o.g, pan: o.pan }); },
+      keys: (t, o) => { const r = CM.rng('k' + t), end = t + (o.dur || 0.4); for (let x = t; x < end; x += 0.055 + r() * 0.035) { hiss(x, { dur: 0.014, filter: 'bandpass', ff: 3200 + r() * 900, q: 3, gain: 0.2 * o.g, pan: o.pan, soft: true }); voice(x, { f: 1900 + r() * 300, dur: 0.012, gain: 0.025 * o.g, pan: o.pan, soft: true }); } },
+      // highlighter / marker swipe: grainy felt drag
+      marker: (t, o) => { const d = o.dur || 0.25, r = CM.rng('m' + t); for (let x = 0; x < d; x += 0.022 + r() * 0.012) hiss(t + x, { dur: 0.03, filter: 'bandpass', ff: 1700 + r() * 900, q: 1.4, gain: 0.16 * o.g * (0.6 + r() * 0.5), pan: o.pan, soft: o.soft }); },
+      strike: (t, o) => { hiss(t, { dur: 0.15, filter: 'bandpass', ff: [[0, 1200], [0.15, 3200]], q: 1.2, gain: 0.3 * o.g, a: 0.02, pan: o.pan }); },
+      tapeStop: (t, o) => { voice(t, { type: 'sawtooth', f: [[0, 196], [0.62, 18]], dur: 0.66, gain: 0.22 * o.g, a: 0.004, hold: 0.3, filter: 'lowpass', ff: [[0, 1800], [0.6, 160]] }); voice(t, { f: [[0, 98], [0.62, 12]], dur: 0.66, gain: 0.3 * o.g, a: 0.004, hold: 0.3 }); hiss(t, { color: 'brown', dur: 0.5, filter: 'lowpass', ff: [[0, 900], [0.5, 120]], gain: 0.18 * o.g }); },
+      stamp: (t, o) => { voice(t, { f: [[0, 160], [0.18, 48]], dur: 0.28, gain: 0.6 * o.g }); hiss(t, { dur: 0.06, filter: 'bandpass', ff: 1300, q: 1.1, gain: 0.4 * o.g }); hiss(t + 0.004, { dur: 0.014, filter: 'highpass', ff: 4200, gain: 0.25 * o.g }); },
+      shimmer: (t, o) => { ['C6', 'E6', 'G6', 'B6', 'D7', 'E7'].forEach((n, i) => voice(t + i * 0.035, { f: n, dur: 0.75, gain: 0.045 * o.g, a: 0.003, verb: 0.45, pan: (i % 2 ? 0.35 : -0.35) })); },
+      sparkle: (t, o) => { const r = CM.rng('sp' + t); for (let i = 0; i < 5; i++) voice(t + i * 0.05, { f: 2400 + r() * 2400, dur: 0.25, gain: 0.03 * o.g, a: 0.002, verb: 0.4, pan: r() * 1.2 - 0.6 }); },
+    };
+    function play(name, t, opts = {}) { const fn = S[name]; if (!fn) throw new Error('unknown sound ' + name); fn(t, Object.assign({}, opts, { g: opts.gain == null ? 1 : opts.gain })); }
+
+
+    // ---------------- music: half-time beat with bass and soft pad ----------------
+    function music(t0, t1, p = {}) {
+      const bpm = p.bpm || 98, step = 60 / bpm / 4, bar = step * 16, g = p.gain == null ? 1 : p.gain;
+      const roots = p.roots || ['A1', 'F1', 'C2', 'G1'];
+      const pads = p.pads || [['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['C4', 'E4', 'G4'], ['G3', 'B3', 'D4']];
+      let bi = 0;
+      for (let tb = t0; tb < t1 - 0.05; tb += bar, bi++) {
+        const root = roots[bi % roots.length], pad = pads[bi % pads.length], blen = Math.min(bar, t1 - tb);
+        pad.forEach((n, k) => voice(tb, { type: 'triangle', f: n, dur: blen + 0.2, gain: 0.03 * g, a: 0.3, hold: blen - 0.5, filter: 'lowpass', ff: 1100, pan: (k - 1) * 0.35, verb: 0.3, bus: 'music' }));
+        for (let s = 0; s < 16; s++) {
+          const ts = tb + s * step; if (ts >= t1 - 0.02) break;
+          if (s === 0 || s === 10) { voice(ts, { f: [[0, 150], [0.09, 46]], dur: 0.32, gain: 0.5 * g, bus: 'music' }); hiss(ts, { dur: 0.012, filter: 'highpass', ff: 3000, gain: 0.05 * g, bus: 'music' }); }
+          if (s === 4 || s === 12) { hiss(ts, { dur: 0.16, filter: 'bandpass', ff: 1700, q: 0.8, gain: 0.26 * g, verb: 0.25, bus: 'music' }); hiss(ts + 0.008, { dur: 0.05, filter: 'highpass', ff: 4500, gain: 0.1 * g, bus: 'music' }); }
+          if (s % 2 === 0) hiss(ts, { dur: s % 4 === 2 ? 0.05 : 0.028, filter: 'highpass', ff: 7500, gain: (s % 4 === 2 ? 0.06 : 0.035) * g, bus: 'music' });
+          if ([0, 3, 6, 10, 14].includes(s)) voice(ts, { type: 'triangle', f: root, dur: step * 2.6, gain: 0.2 * g, a: 0.006, hold: step, filter: 'lowpass', ff: 380, bus: 'music' });
+        }
+      }
+    }
+    function drone(t0, t1, p = {}) { const d = t1 - t0, g = p.gain == null ? 1 : p.gain; voice(t0, { f: p.note || 'A1', dur: d, gain: 0.12 * g, a: d * 0.4, hold: d * 0.4, bus: 'music' }); hiss(t0, { color: 'pink', dur: d, filter: 'bandpass', ff: 900, q: 0.5, gain: 0.03 * g, a: d * 0.5, hold: d * 0.3, bus: 'amb' }); }
+    function finish() {
+      DUCKS.sort((a, b) => a.t - b.t);
+      for (const e of DUCKS) { const s = at(e.t); if (s + e.hold < ac.currentTime) continue; duckIn.gain.setTargetAtTime(1 - e.depth, Math.max(s, ac.currentTime), 0.008); duckIn.gain.setTargetAtTime(1, s + e.hold, 0.14); }
+    }
+    return { play, voice, hiss, music, drone, duck, finish, hz, vo: VO };
+  }
+  function live(score, from, opts = {}) {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const k = kit(ac, Object.assign({}, opts, { from: from || 0, lead: 0.04 })); score(k); k.finish();
+    return () => { try { ac.close(); } catch (e) {} };
+  }
+  async function render(score, dur, sr = 48000, opts = {}) {
+    const len = Math.ceil(dur * sr), ac = new OfflineAudioContext(2, len, sr);
+    const k = kit(ac, Object.assign({}, opts, { from: 0 })); score(k); k.finish();
+    const buf = await ac.startRendering(), L = buf.getChannelData(0), R = buf.getChannelData(1), inter = new Float32Array(len * 2);
+    let peak = 0; for (let i = 0; i < len; i++) { inter[2 * i] = L[i]; inter[2 * i + 1] = R[i]; peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }
+    return { inter, peak, sr, frames: len };
+  }
+  return { kit, live, render, hz };
+})();
+
+
+const STYLE = { name: 'Low-Poly Atlas', em: 'Atlas', W: 720, H: 1280, three: true, footage: false, poster: 10.9,
+  fonts: 'family=Playfair+Display:ital,wght@0,700;0,900;1,900&family=JetBrains+Mono:wght@500;700',
+  loads: ['900 60px "Playfair Display"', 'italic 900 60px "Playfair Display"', '700 30px "Playfair Display"', '700 22px "JetBrains Mono"'],
+  cat: { family: '3D', fontsText: 'Playfair Display (700 and 900, italic), JetBrains Mono (500 and 700), Three.js r128',
+    look: 'Faceted low-poly terrain in warm sunset light, built in Three.js: flat-shaded hills, sand coasts and blue water, with roads, routes and campaign arrows drawing themselves across the land.',
+    how: 'The camera drifts over the land while a route draws itself from a city, a red campaign arrow marches along it, more routes branch out, and a counter adds up the distance. Serif headlines and mono date chips give it the feel of a history book.',
+    demo: 'Why Rome built roads',
+    replace: 'TL, hgt() (the shape of the land), ROADS (from and to, in order), the city props, the arrow timing, the labels and counter in overlay() and scoreSound()',
+    keep: 'makeGL(), lights3(), the flat-shaded vertex-coloured terrain built from hgt(), the water plane, growing tubes with setDrawRange(), the arrow that follows a curve, the drifting camera, proj3() labels, chip() and wordLine()',
+    sizes: 'keep headlines at 64 px or more, place names at 22 px or more and the counter at 80 px or more',
+    voLine: 'A route starts drawing as it is mentioned and reaches its end on the destination word, the arrow moves while the march is described, a date chip lands on the date, and the counter locks on its last spoken syllable.',
+    full: '- Full mix (no voiceover): keep the low drums and the horn chords, at most about 3 sounds at once, and a short gap before the counter locks.',
+    voMix: '- Voiceover mix: the player calls SFX.live with { voiceover: true } once narration is loaded. Keep the drums low, mark ticks and steps soft: true, and keep the horn for the title and the last line.',
+    sheet: [
+      'The land is one flat-shaded plane displaced by hgt(x, z) and coloured per face by height (sand, grass, forest, rock, snow). Shape the land for the topic (coasts, a peninsula, a river valley) but keep it stylised, never a traced real map.',
+      'Light: low warm sunset key (#ffcf99) from one side, warm fog, peach sky (#f2b07a). Water is a single slightly transparent blue plane.',
+      'Routes are tubes along Catmull-Rom curves that hug the terrain and grow with setDrawRange. Campaign arrows are red (#c4302b) extrusions that follow a route.',
+      'Type: Playfair Display 900 headline at the top over a warm fade, the second line italic. JetBrains Mono for dates and place chips (dark brown #2a1a10 on cream).',
+      'Use real dates, places and distances, and say "about" for estimates.',
+      'Camera: one slow drift and orbit over the land, no cuts; let the routes do the storytelling.',
+      'Pace: the title holds about 2 seconds, each route takes 1.5 to 2.5 seconds to draw, and the takeaway holds about 2 seconds.',
+    ],
+    sound: [
+      'Bed: low, slow drums (deep thumps with a short noise tail) and a warm pad; horn-like chords (filtered sawtooth) for the title and the end.',
+      'Map events to the kit: a route drawing gets a soft scratching quill (SND.scratch); the marching arrow gets steady soft steps; chips get a soft tick; the counter "tick"s when the shown number changes; the final line gets the horn chord.',
+    ] } };
+const W = STYLE.W, H = STYLE.H;
+
+
+// =====================================================================================================
+// SHARED LIBRARY HELPERS (Style Library, Shorts set). Pure functions of t; all randomness seeded.
+// W and H are the canvas size (set from STYLE). Coordinates are canvas pixels.
+// =====================================================================================================
+const { clamp, lerp, span, rng, noise1, ez } = CM;
+const TAU = Math.PI * 2;
+const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+const lg = (c, x0, y0, x1, y1, stops) => { const g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, col]) => g.addColorStop(o, col)); return g; };
+const rg = (c, x, y, r0, r1, stops) => { const g = c.createRadialGradient(x, y, r0, x, y, r1); stops.forEach(([o, col]) => g.addColorStop(o, col)); return g; };
+const fillAll = (c, f) => { c.fillStyle = f; c.fillRect(0, 0, W, H); };
+// keyframe track: K = [[t, v1, v2, ...], ...], eased in-out between keys
+function track(K, t, e = ez.inout3) {
+  if (t <= K[0][0]) return K[0].slice(1);
+  for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (t <= b[0]) { const u = e((t - a[0]) / Math.max(1e-6, b[0] - a[0])); return a.slice(1).map((v, j) => lerp(v, b[j + 1], u)); } }
+  return K[K.length - 1].slice(1);
+}
+const textW = (c, s, font, ls = 0) => { c.save(); c.font = font; c.letterSpacing = ls + 'px'; const w = c.measureText(s).width; c.restore(); return w; };
+const pxOf = (font) => parseFloat(/(\d+(?:\.\d+)?)px/.exec(font)[1]);
+// text with options: a (align), b (baseline), ls (letter spacing), r (rotation), alpha, glow/gb, st/sw (stroke under fill), s (scale)
+function txt(c, s, x, y, o = {}) {
+  c.save(); c.font = o.f || '700 40px Inter'; c.textAlign = o.a || 'left'; c.textBaseline = o.b || 'alphabetic'; c.letterSpacing = (o.ls || 0) + 'px';
+  c.translate(x, y); if (o.r) c.rotate(o.r); if (o.s != null) c.scale(o.s, o.s); if (o.alpha != null) c.globalAlpha *= o.alpha;
+  if (o.glow) { c.shadowColor = o.glow; c.shadowBlur = o.gb || 24; }
+  if (o.st) { c.lineJoin = 'round'; c.lineWidth = o.sw || 10; c.strokeStyle = o.st; c.strokeText(s, 0, 0); if (!o.glow) c.shadowColor = 'transparent'; }
+  if (o.c !== null) { c.fillStyle = o.c || '#fff'; c.fillText(s, 0, 0); }
+  c.restore();
+}
+// rounded label; returns its width. a: 'left' | 'center' | 'right' anchor at x; y is the top
+function chip(c, s, x, y, o = {}) {
+  const f = o.f || '700 24px Inter', px = o.px == null ? pxOf(f) * 0.75 : o.px, h = o.h || pxOf(f) * 1.9, w = textW(c, s, f, o.ls || 0) + px * 2;
+  const x0 = o.a === 'center' ? x - w / 2 : o.a === 'right' ? x - w : x;
+  c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha; if (o.shadow) { c.shadowColor = o.shadow; c.shadowBlur = o.sb || 24; c.shadowOffsetY = 8; }
+  rr(c, x0, y, w, h, o.r == null ? h / 2 : o.r); c.fillStyle = o.bg || '#fff'; c.fill(); c.shadowColor = 'transparent';
+  if (o.stroke) { c.strokeStyle = o.stroke; c.lineWidth = o.sw || 2; c.stroke(); }
+  txt(c, s, x0 + px, y + h / 2 + pxOf(f) * 0.05, { f, c: o.fg || '#111', b: 'middle', ls: o.ls }); c.restore(); return w;
+}
+// ---------- animation primitives ----------
+const pop = (t, t0, d = 0.45, s = 1.9) => ez.back(span(t, t0, t0 + d), s);
+const inn = (t, t0, d = 0.5) => ez.outExpo(span(t, t0, t0 + d));
+const out = (t, t0, d = 0.35) => 1 - ez.in3(span(t, t0, t0 + d));
+const typed = (full, t, a, b) => full.slice(0, Math.floor(full.length * span(t, a, b) + 1e-6));
+const count = (v0, v1, t, a, b, e = ez.out3) => lerp(v0, v1, e(span(t, a, b)));
+const pulse = (t, t0, d = 0.6) => { const u = (t - t0) / d; return u < 0 || u > 1 ? 0 : Math.sin(Math.PI * u); };
+// a word slams in: big, blurred and transparent, settling with an expo ease
+function slam(c, s, x, y, font, color, t0, t, o = {}) {
+  if (t < t0) return textW(c, s, font, o.ls || 0); const u = span(t, t0, t0 + (o.dur || 0.28)), e = ez.outExpo(u), sc = lerp(o.from || 1.9, 1, e);
+  c.save(); if (u < 1 && !o.noBlur) c.filter = `blur(${(1 - e) * 10}px)`;
+  txt(c, s, x, y, Object.assign({}, o, { f: font, c: color, s: sc * (o.s || 1), alpha: Math.min(1, e * 2.2) * (o.alpha == null ? 1 : o.alpha) })); c.restore();
+  return textW(c, s, font, o.ls || 0);
+}
+// a word rises from behind a mask line
+function rise(c, s, x, y, font, color, t0, t, o = {}) {
+  const w = textW(c, s, font, o.ls || 0); if (t < t0) return w;
+  const px = pxOf(font), X = o.a === 'center' ? x - w / 2 : o.a === 'right' ? x - w : x, e = ez.outExpo(span(t, t0, t0 + (o.dur || 0.5)));
+  c.save(); c.beginPath(); c.rect(X - 20, y - px * 1.05, w + 40, px * 1.38); c.clip();
+  txt(c, s, X, y + (1 - e) * px * 1.0, { f: font, c: color, ls: o.ls, alpha: Math.min(1, e * 1.6) * (o.alpha == null ? 1 : o.alpha), st: o.st, sw: o.sw, glow: o.glow });
+  c.restore(); return w;
+}
+// words: [[text, t0, color?]]; kind: 'rise' | 'slam' | 'pop' | 'fade'; returns word boxes
+function wordLine(c, words, x, y, font, color, t, o = {}) {
+  const sp = textW(c, ' ', font, o.ls || 0) * (o.space || 1), ws = words.map(([s]) => textW(c, s, font, o.ls || 0)), tot = ws.reduce((a, b) => a + b, 0) + sp * (words.length - 1);
+  let cx = o.a === 'center' ? x - tot / 2 : o.a === 'right' ? x - tot : x; const boxes = [];
+  words.forEach(([s, t0, col], i) => {
+    boxes.push({ x: cx, w: ws[i], y, t0 }); const k = o.kind || 'rise', cl = col || color;
+    if (k === 'slam') slam(c, s, cx + ws[i] / 2, y, font, cl, t0, t, Object.assign({}, o, { a: 'center' }));
+    else if (k === 'pop') { const p = pop(t, t0, 0.35); if (p > 0) txt(c, s, cx + ws[i] / 2, y, Object.assign({}, o, { f: font, c: cl, a: 'center', s: p, alpha: Math.min(1, p * 2) })); }
+    else if (k === 'fade') { const p = inn(t, t0, 0.4); if (p > 0) txt(c, s, cx, y + (1 - p) * 14, Object.assign({}, o, { f: font, c: cl, a: 'left', alpha: p * (o.alpha == null ? 1 : o.alpha) })); }
+    else rise(c, s, cx, y, font, cl, t0, t, Object.assign({}, o, { a: 'left' }));
+    cx += ws[i] + sp;
+  });
+  return boxes;
+}
+// highlighter swipe behind a word box, grows from the left
+function swipeBehind(c, box, font, p, color, o = {}) {
+  if (p <= 0) return; const px = pxOf(font), pad = o.pad == null ? px * 0.16 : o.pad, e = ez.outExpo(clamp(p));
+  c.save(); c.fillStyle = color; if (o.skew) { c.translate(box.x, box.y); c.transform(1, 0, -0.18, 1, 0, 0); c.translate(-box.x, -box.y); }
+  rr(c, box.x - pad, box.y - px * (o.top || 0.86), (box.w + pad * 2) * e, px * (o.hh || 1.08), o.r == null ? px * 0.14 : o.r); c.fill(); c.restore();
+}
+// ---------- drawing helpers ----------
+function leader(c, x1, y1, x2, y2, col = '#fff', w = 2, p = 1) {
+  if (p <= 0) return; c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(lerp(x1, x2, clamp(p)), lerp(y1, y2, clamp(p))); c.stroke();
+  c.beginPath(); c.arc(x1, y1, w * 2.4, 0, TAU); c.fill(); c.restore();
+}
+function arrowHead(c, x, y, ang, s, col) { c.save(); c.translate(x, y); c.rotate(ang); c.fillStyle = col; c.beginPath(); c.moveTo(0, 0); c.lineTo(-s, -s * 0.55); c.lineTo(-s * 0.72, 0); c.lineTo(-s, s * 0.55); c.closePath(); c.fill(); c.restore(); }
+// hand-drawn polyline revealed to progress p (0..1); jitter is seeded and stable
+function hd(c, pts, o = {}) {
+  const p = o.p == null ? 1 : clamp(o.p); if (p <= 0) return; const r = rng(o.seed || 1), j = o.j == null ? 2 : o.j;
+  const J = pts.map(() => [(r() - 0.5) * j * 2, (r() - 0.5) * j * 2, (r() - 0.5) * j * 2, (r() - 0.5) * j * 2]);
+  let L = 0; const seg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); L += d; }
+  c.save(); c.strokeStyle = o.col || '#111'; c.lineWidth = o.w || 4; c.lineCap = c.lineJoin = 'round'; if (o.alpha != null) c.globalAlpha *= o.alpha;
+  for (let pass = 0; pass < (o.passes || 2); pass++) {
+    let left = L * p; c.beginPath(); c.moveTo(pts[0][0] + J[0][pass * 2], pts[0][1] + J[0][pass * 2 + 1]);
+    for (let i = 1; i < pts.length && left > 0; i++) { const u = Math.min(1, left / seg[i - 1]); left -= seg[i - 1];
+      c.lineTo(lerp(pts[i - 1][0] + J[i - 1][pass * 2], pts[i][0] + J[i][pass * 2], u), lerp(pts[i - 1][1] + J[i - 1][pass * 2 + 1], pts[i][1] + J[i][pass * 2 + 1], u)); }
+    c.stroke(); c.lineWidth *= 0.6; }
+  c.restore();
+}
+const ellipsePts = (cx, cy, rx, ry, turns = 1.08, n = 48, a0 = -0.5) => Array.from({ length: n + 1 }, (_, i) => { const a = a0 + i / n * TAU * turns, k = 1 + 0.03 * Math.sin(i * 1.7) + i * 0.0015; return [cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]; });
+const quadPts = (a, q, b, n = 40) => Array.from({ length: n + 1 }, (_, i) => { const u = i / n, v = 1 - u; return [v * v * a[0] + 2 * v * u * q[0] + u * u * b[0], v * v * a[1] + 2 * v * u * q[1] + u * u * b[1]]; });
+function polyPart(c, pts, p) { const n = Math.max(2, Math.ceil(pts.length * clamp(p))); c.beginPath(); pts.slice(0, n).forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); }
+function blob(c, cx, cy, r, seed, k = 0.28, n = 18, sq = 0.85) { const R = rng(seed), rs = Array.from({ length: n }, () => 1 + (R() - 0.5) * 2 * k); c.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * TAU, q = rs[i % n]; const x = cx + Math.cos(a) * r * q, y = cy + Math.sin(a) * r * q * sq; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); }
+function star(c, x, y, r1, r2, n = 5, rot = -Math.PI / 2) { c.beginPath(); for (let i = 0; i < n * 2; i++) { const a = rot + i / (n * 2) * TAU, q = i % 2 ? r2 : r1; c.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } c.closePath(); }
+// pre-baked grain tiles, stepped at 24 fps
+const GRAIN = (() => { const tiles = []; for (let k = 0; k < 6; k++) { const L = CM.layer(256, 256), x = L.getContext('2d'), r = rng('grain' + k), d = x.createImageData(256, 256); for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); tiles.push(L); } return tiles; })();
+function grain(c, t, a = 0.06, mode = 'overlay') { c.save(); c.globalAlpha = a; c.globalCompositeOperation = mode; const tile = GRAIN[Math.floor(t * 24) % 6], pat = c.createPattern(tile, 'repeat'), r = rng(Math.floor(t * 24)); c.translate(-r() * 256, -r() * 256); c.fillStyle = pat; c.fillRect(0, 0, W + 512, H + 512); c.restore(); }
+function vignette(c, a = 0.5, inner = 0.3, outer = 0.8) { c.fillStyle = rg(c, W / 2, H / 2, Math.max(W, H) * inner, Math.max(W, H) * outer, [[0, 'rgba(0,0,0,0)'], [1, `rgba(0,0,0,${a})`]]); c.fillRect(0, 0, W, H); }
+// a simple faceless presenter used as a stand-in for footage
+function person(c, cx, by, s, o = {}) {
+  const sk = o.skin || '#d9a284', hr = o.hair || '#2a1d17', shirt = o.shirt || '#2f4b7c', tilt = o.tilt || 0;
+  c.save(); c.translate(cx, by); c.rotate(tilt * 0.02); c.translate(-cx, -by);
+  c.fillStyle = shirt; c.beginPath(); c.moveTo(cx - 128 * s, by); c.bezierCurveTo(cx - 124 * s, by - 96 * s, cx - 86 * s, by - 132 * s, cx - 34 * s, by - 142 * s); c.lineTo(cx + 34 * s, by - 142 * s); c.bezierCurveTo(cx + 86 * s, by - 132 * s, cx + 124 * s, by - 96 * s, cx + 128 * s, by); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.moveTo(cx - 24 * s, by - 142 * s); c.lineTo(cx, by - 112 * s); c.lineTo(cx + 24 * s, by - 142 * s); c.fill();
+  c.fillStyle = sk; rr(c, cx - 21 * s, by - 178 * s, 42 * s, 48 * s, 12 * s); c.fill();
+  const hy = by - 220 * s + (o.nod || 0) * s; c.beginPath(); c.ellipse(cx, hy, 45 * s, 56 * s, 0, 0, TAU); c.fill();
+  c.beginPath(); c.ellipse(cx - 45 * s, hy + 6 * s, 7 * s, 12 * s, 0, 0, TAU); c.ellipse(cx + 45 * s, hy + 6 * s, 7 * s, 12 * s, 0, 0, TAU); c.fill();
+  c.fillStyle = rg(c, cx + 26 * s, hy + 10 * s, 4 * s, 60 * s, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.22)']]); c.beginPath(); c.ellipse(cx, hy, 45 * s, 56 * s, 0, 0, TAU); c.fill();
+  c.fillStyle = hr; c.beginPath(); c.ellipse(cx, hy - 18 * s, 49 * s, 42 * s, 0, Math.PI * 0.98, Math.PI * 2.02); c.fill(); c.beginPath(); c.ellipse(cx + 8 * s, hy - 42 * s, 40 * s, 20 * s, -0.2, 0, TAU); c.fill();
+  c.restore();
+}
+// footage: your own clip when loaded (window.loadFootage), else a defocused room with a faceless presenter
+const FOOT = { video: null };
+function footage(c, x, y, w, h, t, o = {}) {
+  c.save(); rr(c, x, y, w, h, o.r || 0); c.clip();
+  const v = FOOT.video;
+  if (v && v.readyState >= 2) { const s = Math.max(w / v.videoWidth, h / v.videoHeight), z = o.zoom || 1; c.translate(x + w / 2, y + h / 2); c.scale(z, z); c.drawImage(v, -v.videoWidth * s / 2, -v.videoHeight * s / 2, v.videoWidth * s, v.videoHeight * s); c.restore(); return true; }
+  const z = o.zoom || 1; c.translate(x + w / 2, y + h / 2); c.scale(z, z); c.translate(-(x + w / 2), -(y + h / 2));
+  c.fillStyle = lg(c, x, y, x, y + h, [[0, o.bg ? o.bg[0] : '#5a6b7d'], [1, o.bg ? o.bg[1] : '#2a3340']]); c.fillRect(x, y, w, h);
+  const r = rng(o.seed || 5); c.filter = `blur(${Math.max(4, w / 90)}px)`;
+  c.fillStyle = o.win || 'rgba(255,240,210,.22)'; c.fillRect(x + w * 0.08, y + h * 0.1, w * 0.32, h * 0.42);
+  c.fillStyle = 'rgba(0,0,0,.16)'; c.fillRect(x + w * 0.62, y + h * 0.18, w * 0.3, h * 0.07); c.fillRect(x + w * 0.62, y + h * 0.33, w * 0.3, h * 0.07);
+  for (let i = 0; i < 14; i++) { const bx = x + r() * w, by2 = y + r() * h * 0.7, br = (0.02 + r() * 0.05) * w; c.fillStyle = rg(c, bx, by2, 0, br, [[0, o.bokeh || 'rgba(255,214,150,.5)'], [1, 'rgba(255,214,150,0)']]); c.beginPath(); c.arc(bx, by2, br, 0, TAU); c.fill(); }
+  c.filter = 'none';
+  const nod = Math.sin(t * 2.1) * 3 + Math.sin(t * 5.3) * 1.2, sway = Math.sin(t * 0.9) * 0.6;
+  person(c, x + w / 2 + (o.dx || 0) * w, y + h + (o.dy || 0) * h, (o.s || 1.25) * h / 1280 * 2, Object.assign({}, o, { nod, tilt: sway }));
+  c.fillStyle = rg(c, x + w / 2, y + h / 2, Math.min(w, h) * 0.3, Math.max(w, h) * 0.75, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.42)']]); c.fillRect(x, y, w, h);
+  c.restore(); return false;
+}
+// ---------- scene layers and cuts ----------
+const LA = CM.layer(W, H), LB = CM.layer(W, H);
+function sceneLayer(L, draw, t) { const x = L.getContext('2d'); x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.filter = 'none'; x.clearRect(0, 0, W, H); draw(x, t); return L; }
+// cut types: push (dir), up, fade, zoom (x, y), whip (dir), flash (color), iris (x, y, color), glitch, wipe (color), page
+function composite(ctx, t, SCENES, CUTS, background) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+  if (background) background(ctx, t);
+  let idx = 0; for (const c of CUTS) if (t >= c.t) idx++;
+  const cut = CUTS.find((c) => t >= c.t && t < c.t + c.d);
+  if (!cut) { ctx.drawImage(sceneLayer(LA, SCENES[idx], t), 0, 0); return; }
+  const u = (t - cut.t) / cut.d, e = ez.inout3(u), A = sceneLayer(LA, SCENES[idx - 1], t), B = sceneLayer(LB, SCENES[idx], t), dir = cut.dir || 1;
+  const ty = cut.type;
+  if (ty === 'push' || ty === 'up') {
+    const vx = ty === 'push', s = 1 - 0.04 * Math.sin(Math.PI * u), D = vx ? W : H;
+    for (const [L, off] of [[A, -e * D * dir], [B, (1 - e) * D * dir]]) { ctx.save(); ctx.translate(W / 2 + (vx ? off : 0), H / 2 + (vx ? 0 : off)); ctx.scale(s, s); ctx.drawImage(L, -W / 2, -H / 2); ctx.restore(); }
+  } else if (ty === 'whip') {
+    const L = u < 0.5 ? A : B, off = (u < 0.5 ? -ez.in3(u * 2) : 1 - ez.out3((u - 0.5) * 2)) * W * dir;
+    for (let i = 0; i < 7; i++) { ctx.save(); ctx.globalAlpha = 0.22; ctx.drawImage(L, off + (i - 3) * 26 * Math.sin(Math.PI * u) * dir, 0); ctx.restore(); }
+  } else if (ty === 'zoom') {
+    const z = lerp(1, 3.2, ez.in3(clamp(u / 0.65))); ctx.save(); ctx.globalAlpha = 1 - span(u, 0.38, 0.65); ctx.translate(cut.x, cut.y); ctx.scale(z, z); ctx.drawImage(A, -cut.x, -cut.y); ctx.restore();
+    const zb = lerp(1.15, 1, ez.out3(span(u, 0.35, 1))); ctx.save(); ctx.globalAlpha = span(u, 0.35, 0.72); ctx.translate(W / 2, H / 2); ctx.scale(zb, zb); ctx.drawImage(B, -W / 2, -H / 2); ctx.restore();
+  } else if (ty === 'flash') {
+    ctx.drawImage(u < 0.5 ? A : B, 0, 0); ctx.fillStyle = cut.color || '#fff'; ctx.globalAlpha = 1 - Math.abs(u - 0.5) * 2; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  } else if (ty === 'iris') {
+    const cx = cut.x == null ? W / 2 : cut.x, cy = cut.y == null ? H / 2 : cut.y, R = Math.hypot(W, H);
+    if (u < 0.5) { const r = R * (1 - ez.in3(u * 2)); ctx.fillStyle = cut.color || '#111'; ctx.fillRect(0, 0, W, H); ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.clip(); ctx.drawImage(A, 0, 0); ctx.restore(); if (cut.ring) { ctx.strokeStyle = cut.ring; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.stroke(); } }
+    else { const r = R * ez.out3((u - 0.5) * 2); ctx.fillStyle = cut.color || '#111'; ctx.fillRect(0, 0, W, H); ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.clip(); ctx.drawImage(B, 0, 0); ctx.restore(); if (cut.ring) { ctx.strokeStyle = cut.ring; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.stroke(); } }
+  } else if (ty === 'glitch') {
+    const L = u < 0.5 ? A : B, r = rng('cut' + Math.floor(t * 30)); ctx.drawImage(L, 0, 0);
+    for (let i = 0; i < 9; i++) { const y = r() * H, h = 10 + r() * H * 0.06, dx = (r() - 0.5) * W * 0.18 * Math.sin(Math.PI * u); ctx.drawImage(L, 0, y, W, h, dx, y, W, h); }
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.5 * Math.sin(Math.PI * u); ctx.fillStyle = '#ff0040'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  } else if (ty === 'wipe') {
+    ctx.drawImage(A, 0, 0); const x = lerp(-W * 0.3, W * 1.3, e); ctx.save(); ctx.beginPath(); ctx.moveTo(x - H * 0.3, 0); ctx.lineTo(-10, 0); ctx.lineTo(-10, H); ctx.lineTo(x + H * 0.3 - H * 0.6, H); ctx.lineTo(x - H * 0.3 + 0, 0); ctx.closePath();
+    ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(x, 0); ctx.lineTo(x - H * 0.35, H); ctx.lineTo(-10, H); ctx.closePath(); ctx.clip(); ctx.drawImage(B, 0, 0); ctx.restore();
+    if (cut.color) { ctx.save(); ctx.strokeStyle = cut.color; ctx.lineWidth = 26; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x - H * 0.35, H); ctx.stroke(); ctx.restore(); }
+  } else if (ty === 'page') {
+    ctx.drawImage(B, 0, 0); const x = W * (1 - e); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, x, H); ctx.clip(); ctx.drawImage(A, 0, 0); ctx.restore();
+    ctx.fillStyle = lg(ctx, x - 60, 0, x + 40, 0, [[0, 'rgba(0,0,0,0)'], [0.6, 'rgba(0,0,0,0.25)'], [1, 'rgba(0,0,0,0)']]); ctx.fillRect(x - 60, 0, 100, H);
+  } else { ctx.save(); ctx.globalAlpha = 1 - e; ctx.drawImage(A, 0, 0); ctx.globalAlpha = e; ctx.drawImage(B, 0, 0); ctx.restore(); }
+}
+// camera: zoom z about (x, y), with optional rotation and shake
+function cam(c, x, y, z = 1, rot = 0) { c.translate(x, y); c.scale(z, z); if (rot) c.rotate(rot); c.translate(-x, -y); }
+function shake(c, t, hits, amp = 14, d = 0.35) { let dx = 0, dy = 0; for (const h of hits) { const u = (t - h) / d; if (u > 0 && u < 1) { const k = (1 - u) * amp; dx += Math.sin(u * 61) * k; dy += Math.cos(u * 47) * k; } } c.translate(dx, dy); }
+function punch(t, hits, amt = 0.06, d = 0.45) { let z = 1; for (const h of hits) { const u = (t - h) / d; if (u > 0 && u < 1) z += amt * Math.exp(-u * 4) * Math.sin(Math.min(1, u * 6) * Math.PI / 2); } return z; }
+// ---------- Three.js (3D styles) ----------
+function makeGL() { if (typeof THREE === 'undefined') return null; const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true }); r.setPixelRatio(1); r.setSize(W, H, false); r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.setClearColor(0x000000, 0); return r; }
+function lights3(s, o) {
+  const out = {};
+  if (o.hemi) s.add(out.hemi = new THREE.HemisphereLight(o.hemi[0], o.hemi[1], o.hemi[2]));
+  if (o.amb) s.add(out.amb = new THREE.AmbientLight(o.amb[0], o.amb[1]));
+  if (o.dir) { const d = out.dir = new THREE.DirectionalLight(o.dir[0], o.dir[1]); d.position.set(o.dir[2], o.dir[3], o.dir[4]);
+    if (o.shadow) { d.castShadow = true; d.shadow.mapSize.set(2048, 2048); const sc = d.shadow.camera; sc.left = -o.shadow; sc.right = o.shadow; sc.top = o.shadow; sc.bottom = -o.shadow; sc.near = 0.5; sc.far = 90; d.shadow.bias = -0.0006; }
+    s.add(d); }
+  out.points = (o.points || []).map(([col, int, x, y, z, dist]) => { const p = new THREE.PointLight(col, int, dist || 0); p.position.set(x, y, z); s.add(p); return p; });
+  return out;
+}
+const M3 = (g, color, o = {}) => { const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85, metalness: 0 }, o))); m.castShadow = m.receiveShadow = true; return m; };
+const P3 = (g, color, o = {}) => { const m = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial(Object.assign({ color, roughness: 0.2, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.1 }, o))); m.castShadow = m.receiveShadow = true; return m; };
+const put = (parent, m, x = 0, y = 0, z = 0) => { m.position.set(x, y, z); parent.add(m); return m; };
+const proj3 = (camera, v) => { const p = v.clone().project(camera); return [(p.x + 1) / 2 * W, (1 - p.y) / 2 * H, p.z]; };
+// ---------- sound helpers ----------
+function padBed(k, t0, t1, o = {}) {
+  const bpm = o.bpm || 90, beat = 60 / bpm, bar = beat * 4, chords = o.chords || [['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['C4', 'E4', 'G4'], ['G3', 'B3', 'D4']], g = o.gain == null ? 1 : o.gain;
+  let i = 0;
+  for (let tb = t0; tb < t1 - 0.1; tb += bar, i++) {
+    const ch = chords[i % chords.length], len = Math.min(bar, t1 - tb);
+    ch.forEach((n, j) => { k.voice(tb, { type: o.wave || 'triangle', f: n, dur: len + 0.4, gain: 0.026 * g, a: 0.5, hold: Math.max(0, len - 0.9), filter: 'lowpass', ff: o.cut || 1300, pan: (j - (ch.length - 1) / 2) * 0.3, verb: 0.3, bus: 'music' }); });
+    k.voice(tb, { f: k.hz(ch[0]) / 2, dur: len + 0.2, gain: 0.05 * g, a: 0.3, hold: Math.max(0, len - 0.6), bus: 'music' });
+    for (let b = 0; b < 8; b++) {
+      const ts = tb + b * beat / 2; if (ts >= t1 - 0.05) break;
+      if (o.hats && ts >= o.hats[0] && ts < o.hats[1]) k.hiss(ts, { dur: b % 2 ? 0.03 : 0.045, filter: 'highpass', ff: 8000, gain: (b % 2 ? 0.014 : 0.022) * g, bus: 'music' });
+      if (o.kick && ts >= o.kick[0] && ts < o.kick[1] && (b === 0 || b === 4)) k.voice(ts, { f: [[0, 120], [0.09, 46]], dur: 0.26, gain: 0.16 * g, bus: 'music' });
+      if (o.snare && ts >= o.snare[0] && ts < o.snare[1] && (b === 2 || b === 6)) k.hiss(ts, { dur: 0.14, filter: 'bandpass', ff: 1800, q: 0.8, gain: 0.08 * g, verb: 0.2, bus: 'music' });
+    }
+  }
+}
+// overall level wrapper so a score can be written at comfortable gains
+function gainKit(k0, G) { return Object.assign({}, k0, { voice: (t, p) => k0.voice(t, Object.assign({}, p, { gain: (p.gain == null ? 0.3 : p.gain) * G })), hiss: (t, p) => k0.hiss(t, Object.assign({}, p, { gain: (p.gain == null ? 0.3 : p.gain) * G })), play: (n, t, o = {}) => k0.play(n, t, Object.assign({}, o, { gain: (o.gain == null ? 1 : o.gain) * G })) }); }
+const SND = {
+  tick1: (k, t, pan = 0, g = 1) => { k.voice(t, { f: [[0, 760], [0.05, 1150]], dur: 0.07, gain: 0.07 * g, pan, soft: true }); k.hiss(t, { dur: 0.012, filter: 'highpass', ff: 6000, gain: 0.05 * g, pan, soft: true }); },
+  chime: (k, t, pan = 0, g = 1, n = ['C6', 'G6']) => { k.voice(t, { f: n[0], dur: 0.5, gain: 0.08 * g, a: 0.003, verb: 0.3, pan }); k.voice(t + 0.07, { f: n[1], dur: 0.6, gain: 0.07 * g, a: 0.003, verb: 0.3, pan }); },
+  swipe: (k, t, pan = 0, g = 1) => { k.hiss(t, { dur: 0.24, filter: 'bandpass', ff: [[0, 2400], [0.22, 6200]], q: 1.2, gain: 0.14 * g, a: 0.08, pan }); k.voice(t + 0.12, { f: 'E6', dur: 0.5, gain: 0.05 * g, verb: 0.35, pan }); },
+  tap: (k, t, pan = 0, g = 1, f = 420) => { k.voice(t, { f: [[0, f * 1.6], [0.04, f]], dur: 0.09, gain: 0.16 * g, pan, soft: true }); k.hiss(t, { dur: 0.02, filter: 'bandpass', ff: 1200, q: 1.5, gain: 0.08 * g, pan, soft: true }); },
+  paper: (k, t, pan = 0, g = 1, d = 0.28) => k.hiss(t, { color: 'pink', dur: d, filter: 'bandpass', ff: [[0, 700], [d, 3200]], q: 0.8, gain: 0.12 * g, a: d * 0.4, pan: [pan - 0.3, pan + 0.3], soft: true }),
+  bloop: (k, t, pan = 0, g = 1, f = 520) => k.voice(t, { f: [[0, f], [0.12, f * 1.5]], dur: 0.16, gain: 0.12 * g, pan, verb: 0.15 }),
+  pluck: (k, t, n, pan = 0, g = 1) => { k.voice(t, { type: 'triangle', f: n, dur: 0.6, gain: 0.1 * g, a: 0.002, verb: 0.3, pan }); k.voice(t, { f: n, dur: 0.25, gain: 0.05 * g, a: 0.002, pan }); },
+  chord: (k, t, notes, g = 1, d = 1.6) => notes.forEach((n, i) => k.voice(t + i * 0.05, { f: n, dur: d, gain: 0.05 * g, a: 0.01, verb: 0.4, pan: (i - (notes.length - 1) / 2) * 0.25 })),
+  scratch: (k, t, d = 0.2, pan = 0, g = 1) => { const r = CM.rng('sc' + t); for (let x = 0; x < d; x += 0.018 + r() * 0.01) k.hiss(t + x, { dur: 0.025, filter: 'bandpass', ff: 2600 + r() * 1800, q: 2, gain: 0.08 * g * (0.5 + r() * 0.6), pan, soft: true }); },
+  thud: (k, t, g = 1) => { k.voice(t, { f: [[0, 110], [0.15, 45]], dur: 0.3, gain: 0.35 * g }); k.hiss(t, { color: 'brown', dur: 0.15, filter: 'lowpass', ff: 500, gain: 0.2 * g }); },
+  beep: (k, t, f = 880, d = 0.12, g = 1, pan = 0) => k.voice(t, { type: 'square', f, dur: d, gain: 0.05 * g, a: 0.002, hold: d * 0.7, filter: 'lowpass', ff: 3000, pan }),
+};
+
+
+// =====================================================================================================
+// STYLE: Low-Poly Atlas, story-driven. Everything below reads window.__STORY__ (made by atlas.py).
+// Flat-shaded sunset terrain with routes that draw themselves and a campaign arrow that follows them.
+// =====================================================================================================
+const S = window.__STORY__;
+const C = { sky: '#f2b07a', ink: '#2a1a10', red: '#c4302b', road: '#fff3d6', cream: '#fff4e6' };
+const HEAD = (px, it = '') => `${it} 900 ${px}px "Playfair Display", Georgia, serif`, MONO = (px, w = 700) => `${w} ${px}px "JetBrains Mono", ui-monospace, monospace`;
+const TL = S.tl;
+const PTS = S.route.map((p) => [p.x, p.z]);
+const EXTRA = (S.extra || []).map((r) => r.points.map((p) => [p.x, p.z]));
+const PH = (() => { const r = rng('atlas' + (S.seed || 7)); return [r() * TAU, r() * TAU, r() * TAU, r() * TAU]; })();
+const LIFTS = [];
+[PTS, ...EXTRA].forEach((pts) => { for (let i = 0; i < pts.length - 1; i++) { const [x0, z0] = pts[i], [x1, z1] = pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 0.8)); for (let k = 0; k <= n; k++) LIFTS.push([lerp(x0, x1, k / n), lerp(z0, z1, k / n)]); } });
+// the shape of the land: soft hills, lifted along every route so the roads always run over dry land, sea toward the edges
+const hgt = (x, z) => {
+  let h = 0.8 * Math.sin(x * 0.45 + PH[0]) * Math.cos(z * 0.38 + PH[1]) + 0.45 * Math.sin(x * 1.1 + z * 0.7 + PH[2]) + 0.3 * Math.cos(z * 1.3 - x * 0.4 + PH[3]) + 0.2, l = 0;
+  for (let i = 0; i < LIFTS.length; i++) { const dx = x - LIFTS[i][0], dz = z - LIFTS[i][1], d2 = dx * dx + dz * dz; if (d2 < 10) l = Math.max(l, 1.25 * Math.exp(-d2 / 2.4)); }
+  return h + l - Math.max(0, Math.max(Math.abs(x) - 8.5, Math.abs(z - S.cam.z) - 10)) * 0.8;
+};
+let G = null, ARR = [];
+function V(x, z) { return new THREE.Vector3(x, Math.max(hgt(x, z), 0.12) + 0.08, z); }
+const routeP = (t, a, b) => { const u = span(t, a, b); return lerp(u, ez.inout3(u), 0.3); };
+function init3() {
+  const r = makeGL(); if (!r) return null;
+  const s = new THREE.Scene(); s.background = new THREE.Color(C.sky); s.fog = new THREE.Fog(C.sky, 18, 44);
+  const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 200);
+  const L = lights3(s, { hemi: ['#ffe0bd', '#4d3a2c', 0.6], dir: ['#ffcf99', 1.05, -7, 5, 4 + S.cam.z], shadow: 12 }); L.dir.shadow.mapSize.set(1024, 1024); L.dir.target.position.set(0, 0, S.cam.z); s.add(L.dir.target);
+  let g = new THREE.PlaneGeometry(26, 26, 44, 44); g.rotateX(-Math.PI / 2); g = g.toNonIndexed();
+  const p = g.attributes.position, cols = []; for (let i = 0; i < p.count; i++) p.setY(i, hgt(p.getX(i), p.getZ(i) + S.cam.z)); for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) + S.cam.z);
+  for (let i = 0; i < p.count; i += 3) { const y = (p.getY(i) + p.getY(i + 1) + p.getY(i + 2)) / 3, col = new THREE.Color(y < 0.12 ? '#e3c48a' : y < 0.95 ? '#93b85c' : y < 1.8 ? '#5f8c45' : y < 2.7 ? '#8b7d6a' : '#f3efe8'); for (let k = 0; k < 3; k++) cols.push(col.r, col.g, col.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); g.computeVertexNormals();
+  const land = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 })); land.receiveShadow = land.castShadow = true; s.add(land);
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: '#3e8ccc', roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.9 })); water.rotation.x = -Math.PI / 2; water.position.set(0, 0.05, S.cam.z); s.add(water);
+  const mkRoad = (pts) => { const flat = new THREE.CatmullRomCurve3(pts.map(([x, z]) => new THREE.Vector3(x, 0, z))), dense = flat.getSpacedPoints(120).map((q) => V(q.x, q.z)), curve = new THREE.CatmullRomCurve3(dense), geo = new THREE.TubeGeometry(curve, 240, 0.11, 6); const m = M3(geo, C.road, { roughness: 0.7 }); s.add(m); return { curve, m, n: geo.index.count }; };
+  const roads = [mkRoad(PTS), ...EXTRA.map(mkRoad)];
+  // little towns at every named place
+  const cr = rng('city'); const towns = S.route.map((pl, k) => { const grp = new THREE.Group(); grp.position.set(pl.x, Math.max(hgt(pl.x, pl.z), 0.1), pl.z); s.add(grp);
+    const nb = k === 0 || k === S.route.length - 1 ? 12 : 6; for (let i = 0; i < nb; i++) { const a = cr() * TAU, d = cr() * 0.5, h = 0.12 + cr() * 0.22; put(grp, M3(new THREE.BoxGeometry(0.16, h, 0.16), '#f4ece0'), Math.cos(a) * d, h / 2, Math.sin(a) * d); put(grp, M3(new THREE.ConeGeometry(0.14, 0.1, 4), '#c8553d'), Math.cos(a) * d, h + 0.05, Math.sin(a) * d).rotation.y = Math.PI / 4; } return grp; });
+  const sh = new THREE.Shape(); sh.moveTo(-0.9, -0.2); sh.lineTo(0.4, -0.2); sh.lineTo(0.4, -0.45); sh.lineTo(1.0, 0); sh.lineTo(0.4, 0.45); sh.lineTo(0.4, 0.2); sh.lineTo(-0.9, 0.2); sh.closePath();
+  const arrow = new THREE.Group(); const am = M3(new THREE.ExtrudeGeometry(sh, { depth: 0.14, bevelEnabled: false }), C.red, { roughness: 0.55 }); am.rotation.x = -Math.PI / 2; arrow.add(am); s.add(arrow);
+  return { r, s, camera, roads, arrow };
+}
+// Camera: a high wide shot that slowly dollies in, then it dives down and follows the arrow along the route (close, swinging round the land),
+// punches in on every place the arrow reaches, and finally pulls far back to show the whole journey. A pure function of t.
+const cs = (u) => ez.inout3(clamp(u));
+function camPose(t) {
+  const cv = G.roads[0].curve, q = t / TL.D, r0 = TL.route[0], r1 = TL.route[1];
+  const fl = clamp(routeP(t - 0.5, r0, r1) * 0.96 + 0.02), tp = cv.getPointAt(clamp(fl + 0.07));
+  const w1 = cs(span(t, r0 - 1.6, r0 + 0.9)), w2 = cs(span(t, r1 - 0.3, r1 + 2.4)), wf = w1 * (1 - w2);
+  let pl = 0; arrivals().forEach((a, i) => { if (i > 0) pl = Math.max(pl, Math.sin(Math.PI * clamp((t - (a - 0.3)) / 2.0))); }); pl *= wf;
+  const Rov = t < r1 ? lerp(S.cam.r + 5, S.cam.r + 1, span(t, 0, r0)) : lerp(S.cam.r + 1, S.cam.r + 6, span(t, r1, TL.D));
+  const R = lerp(Rov, 10.5 - 2.6 * pl, wf), h = lerp(Rov * (S.cam.h / S.cam.r), 7.8 - 1.6 * pl, wf), a = lerp(-0.5, 0.5, q) + 0.22 * Math.sin(t * 0.75);
+  const tx = lerp(0, tp.x, wf), ty = lerp(0, tp.y, wf), tz = lerp(S.cam.z, tp.z, wf);
+  G.camera.position.set(tx + Math.sin(a) * R, ty + h, tz + Math.cos(a) * R); G.camera.lookAt(tx, ty, tz);
+  const fov = 34 - 6 * pl; if (Math.abs(G.camera.fov - fov) > 1e-3) { G.camera.fov = fov; G.camera.updateProjectionMatrix(); }
+}
+function pose(t) {
+  G.roads.forEach((rd, i) => { const ab = i === 0 ? TL.route : TL.extra[i - 1], p = i === 0 ? routeP(t, ab[0], ab[1]) : ez.inout3(span(t, ab[0], ab[1])); rd.m.geometry.setDrawRange(0, Math.floor(rd.n * p / 36) * 36); rd.m.visible = p > 0; });
+  const u = routeP(t, TL.route[0], TL.route[1]), cv = G.roads[0].curve, f = clamp(u * 0.96 + 0.02), pt = cv.getPointAt(f), tg = cv.getTangentAt(f);
+  G.arrow.position.set(pt.x, pt.y + 0.5 + Math.abs(Math.sin(t * 9)) * 0.05, pt.z); G.arrow.rotation.y = -Math.atan2(tg.z, tg.x);
+  G.arrow.visible = t > TL.route[0] - 0.2 && t < TL.route[1] + 0.6; G.arrow.scale.setScalar(Math.max(0.001, pop(t, TL.route[0] - 0.2, 0.4) * (1 - span(t, TL.route[1] + 0.2, TL.route[1] + 0.6))));
+  camPose(t);
+}
+const cnt = (t) => Math.round(S.counter.value * ez.out3(span(t, TL.count[0], TL.count[1])) / S.counter.step) * S.counter.step;
+function fitLine(c, s, font0, maxW, minPx) { let px = pxOf(font0); const it = /^italic/.test(font0) ? 'italic' : ''; while (px > minPx && textW(c, s, HEAD(px, it)) > maxW) px -= 2; return px; }
+function overlay(c, t) {
+  c.fillStyle = lg(c, 0, 0, 0, 330, [[0, 'rgba(250,215,170,0.96)'], [0.7, 'rgba(250,215,170,0.6)'], [1, 'rgba(250,215,170,0)']]); c.fillRect(0, 0, W, 330);
+  // date line: the date of the latest place reached
+  { let label = S.date_chip, p = inn(t, TL.date, 0.5); S.route.forEach((pl, i) => { if (pl.date && ARR[i] != null && t >= ARR[i] && i > 0) label = pl.date + ' · ' + pl.name; }); if (p > 0) txt(c, label, 50, 70, { f: MONO(24), c: '#8a3b1d', ls: 3, alpha: p }); }
+  { const l1 = S.title[0], l2 = S.title[1], px1 = fitLine(c, l1, HEAD(84), 628, 64), px2 = fitLine(c, l2, HEAD(84, 'italic'), 628, 64);
+    wordLine(c, l1.split(' ').map((w, i) => [w, TL.title[0] + 0.12 * i]), 46, 160, HEAD(px1), C.ink, t);
+    wordLine(c, l2.split(' ').map((w, i) => [w, TL.title[1] + 0.12 * i]), 46, 252, HEAD(px2, 'italic'), C.ink, t); }
+  if (G) {
+    // place chips (a later chip drops below an earlier one that is still showing and close by)
+    const shown = []; S.route.forEach((pl, i) => { const t0 = ARR[i], last = i === S.route.length - 1, o = last ? 1 - span(t, TL.take[0] - 0.4, TL.take[0]) : 1 - span(t, t0 + 2.6, t0 + 3.0), p = pop(t, t0, 0.4); if (p <= 0 || o <= 0) return;
+      let [rx, ry] = proj3(G.camera, V(pl.x, pl.z).add(new THREE.Vector3(0, 0.5, 0))); rx = clamp(rx, 110, 610); ry = clamp(ry - 30, 400, 780);
+      shown.forEach(([sx, sy]) => { if (Math.abs(rx - sx) < 230 && Math.abs(ry - sy) < 58) ry = sy + 62; }); ry = Math.min(ry, 800); shown.push([rx, ry]);
+      c.save(); c.globalAlpha = o; c.translate(rx, ry); c.scale(p, p);
+      chip(c, pl.name, 0, -26, { f: MONO(24), bg: C.ink, fg: '#fff', a: 'center', ls: 2 }); c.fillStyle = C.ink; c.beginPath(); c.moveTo(-9, 20); c.lineTo(9, 20); c.lineTo(0, 34); c.fill(); c.restore(); });
+    if (S.arrow_label && t > TL.route[0] && t < TL.route[0] + 4.2) { const [ax, ay] = proj3(G.camera, G.arrow.position); chip(c, S.arrow_label, clamp(ax, 200, 520), clamp(ay - 110, 360, 760), { f: MONO(22), bg: C.red, fg: '#fff', a: 'center', alpha: inn(t, TL.route[0], 0.4) * (1 - span(t, TL.route[0] + 3.6, TL.route[0] + 4.1)) }); } }
+  // counter card
+  { const p = inn(t, TL.count[0] - 0.2, 0.4), o = 1 - span(t, TL.take[0] - 0.4, TL.take[0]); if (p > 0 && o > 0) { c.save(); c.globalAlpha = p * o; rr(c, 40, 1020, 640, 190, 28); c.fillStyle = 'rgba(255,244,230,0.94)'; c.fill();
+    txt(c, cnt(t).toLocaleString('en-US') + ' ' + S.counter.unit, 360, 1120, { f: HEAD(fitLine(c, '99,999 ' + S.counter.unit, HEAD(84), 590, 80)), c: C.ink, a: 'center' }); txt(c, (S.counter.about ? 'ABOUT · ' : '') + S.counter.label, 360, 1170, { f: MONO(22), c: '#8a3b1d', a: 'center', ls: 2 }); c.restore(); } }
+  // takeaway
+  { const p = inn(t, TL.take[0] - 0.2, 0.4), o = 1 - span(t, TL.brand - 0.3, TL.brand); if (p > 0 && o > 0) { c.save(); c.globalAlpha = p * o; rr(c, 40, 1000, 640, 230, 28); c.fillStyle = 'rgba(255,244,230,0.94)'; c.fill(); c.restore();
+    const w1 = S.take[0].split(' '), w2 = S.take[1].split(' '); const pa = fitLine(c, S.take[0], HEAD(60), 580, 40), pb = fitLine(c, S.take[1], HEAD(60, 'italic'), 580, 40);
+    c.save(); c.globalAlpha = o; wordLine(c, w1.map((w, i) => [w, TL.take[0] + 0.1 * i]), 360, 1095, HEAD(pa), C.ink, t, { a: 'center' }); wordLine(c, w2.map((w, i) => [w, TL.take[1] + 0.1 * i, i === w2.length - 1 ? C.red : undefined]), 360, 1180, HEAD(pb, 'italic'), C.ink, t, { a: 'center' }); c.restore(); } }
+  // brand card (last beat)
+  { const p = inn(t, TL.brand, 0.45); if (p > 0) { c.save(); c.globalAlpha = p; rr(c, 40, 990, 640, 250, 28); c.fillStyle = 'rgba(255,244,230,0.97)'; c.fill();
+    txt(c, S.brand, 360, 1100, { f: HEAD(96), c: C.ink, a: 'center' }); txt(c, 'FOLLOW · A NEW STORY EVERY DAY', 360, 1170, { f: MONO(22), c: '#8a3b1d', a: 'center', ls: 2 }); c.restore(); } }
+  // captions (English, spoken words)
+  for (const [a, b, s] of S.caps) { if (t >= a && t < b) { const p = inn(t, a, 0.2), o = 1 - span(t, b - 0.12, b); chip(c, s, 360, 862, { f: `700 40px "Playfair Display", Georgia, serif`, bg: 'rgba(255,244,230,0.94)', fg: C.ink, a: 'center', alpha: p * o, h: 72, px: 28 }); break; } }
+}
+function explainer(ctx, t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = 'none';
+  if (!G) { G = init3(); arrivals(); }
+  if (G) { pose(t); G.r.render(G.s, G.camera); ctx.drawImage(G.r.domElement, 0, 0); } else fillAll(ctx, C.sky);
+  overlay(ctx, t); grain(ctx, t, 0.04); vignette(ctx, 0.25);
+}
+
+
+// =================================== SOUND SCORE ===================================
+// Ancient and steady: slow low drums under a warm pad, horn chords for the title and the last line,
+// a quill scratch as each road draws, soft marching steps, ticks for chips and the counter.
+function scoreSound(k) {
+  k = gainKit(k, 2.0);
+  padBed(k, 0, TL.D, { bpm: 80, chords: [['D3', 'F3', 'A3'], ['Bb2', 'D3', 'F3'], ['C3', 'E3', 'G3'], ['A2', 'C#3', 'E3']], cut: 900, gain: 0.8 });
+  const beat = 60 / 80, d0 = TL.route[0]; for (let t = d0; t < TL.D - 1; t += beat) { const acc = Math.round((t - d0) / beat) % 4 === 0; k.voice(t, { f: [[0, acc ? 95 : 80], [0.18, 42]], dur: 0.35, gain: acc ? 0.4 : 0.25 }); k.hiss(t, { color: 'brown', dur: 0.12, filter: 'lowpass', ff: 700, gain: 0.12 }); }
+  const horn = (t, notes, g = 1) => notes.forEach((n, i) => k.voice(t, { type: 'sawtooth', f: n, dur: 1.8, gain: 0.035 * g, a: 0.15, hold: 1, filter: 'lowpass', ff: [[0, 600], [0.4, 1500], [1.8, 700]], verb: 0.4, pan: (i - 1) * 0.3 }));
+  horn(TL.title[0], ['D3', 'A3', 'D4']); SND.tick1(k, TL.date, -0.3);
+  const arr = arrivals();
+  arr.forEach((t, i) => k.play('pop', t, { f: 560 + i * 40, gain: 0.45 }));
+  for (let i = 0; i < arr.length - 1; i++) { const d = Math.min(1.8, arr[i + 1] - arr[i] - 0.1); if (d > 0.3) SND.scratch(k, arr[i] + 0.05, d, (i % 2 ? 0.3 : -0.3), 0.8); }
+  TL.extra.forEach(([a, b], i) => SND.scratch(k, a, Math.min(2.2, b - a), i % 2 ? 0.3 : -0.3, 0.8));
+  for (let t = TL.route[0]; t < TL.route[1]; t += 0.5) k.hiss(t, { color: 'brown', dur: 0.06, filter: 'lowpass', ff: 600, gain: 0.12, soft: true });
+  { let last = -1; for (let t = TL.count[0]; t <= TL.count[1]; t += 1 / 60) { const v = Math.floor(cnt(t) / S.counter.tickEvery); if (v !== last && v > 0) { k.play('tick', t, { f: 2400 + v * 90, gain: 0.3, soft: true }); last = v; } } }
+  k.play('pop', TL.count[1], { f: 700, gain: 0.5 }); horn(TL.take[1] + 0.2, ['D3', 'F#3', 'A3', 'D4'], 1.2); SND.chime(k, TL.brand + 0.1, 0, 1.2);
+}
+// when the arrow reaches each named place: same numbers for the picture and the sound score, no GL needed
+function arrivals() {
+  if (ARR.length) return ARR;
+  const flat = new THREE.CatmullRomCurve3(PTS.map(([x, z]) => new THREE.Vector3(x, 0, z))), cv = new THREE.CatmullRomCurve3(flat.getSpacedPoints(120).map((q) => V(q.x, q.z))), samples = cv.getSpacedPoints(400);
+  const fr = S.route.map((pl) => { let best = 0, bd = 1e9; samples.forEach((q, i) => { const d = Math.hypot(q.x - pl.x, q.z - pl.z); if (d < bd) { bd = d; best = i / 400; } }); return best; });
+  ARR = fr.map((f, i) => { if (i === 0) return TL.route[0] - 0.3; for (let t = TL.route[0]; t <= TL.route[1] + 0.01; t += 0.02) if (routeP(t, TL.route[0], TL.route[1]) * 0.96 + 0.02 >= f) return t; return TL.route[1]; });
+  return ARR;
+}
+
+
+// =================================== PLAYER ===================================
+const cvs = document.getElementById('stage'), ctx = cvs.getContext('2d');
+const DURATION = TL.D;
+window.seek = (t) => explainer(ctx, clamp(t, 0, DURATION));
+window.DURATION = DURATION;
+window.scoreSound = scoreSound;
+window.SFX = SFX;
+window.loadFootage = (url) => { const v = document.createElement('video'); v.src = url; v.muted = true; v.playsInline = true; v.loop = true; v.crossOrigin = 'anonymous'; v.addEventListener('loadeddata', () => { FOOT.video = v; try { v.currentTime = T % (v.duration || 1); } catch (e) {} draw(); }); v.load(); };
+
+
+const ui = { play: document.getElementById('play'), scrub: document.getElementById('scrub'), time: document.getElementById('time'), sound: document.getElementById('sound'), loop: document.getElementById('loop'), vo: document.getElementById('vofile'), foot: document.getElementById('footfile'), note: document.getElementById('vonote') };
+let T = 0, playing = false, last = 0, soundOn = true, loopOn = true, stopSound = null, voAudio = null;
+const fmt = (t) => t.toFixed(2) + ' / ' + DURATION.toFixed(2);
+function draw() { window.seek(T); ui.scrub.value = T; ui.time.textContent = fmt(T); }
+function syncFoot() { const v = FOOT.video; if (!v) return; try { v.currentTime = T % (v.duration || 1); if (playing) v.play().catch(() => {}); else v.pause(); } catch (e) {} }
+function startAudio() {
+  stopAudio(); if (!playing) return;
+  if (soundOn) stopSound = SFX.live(scoreSound, T, { voiceover: !!voAudio });
+  if (voAudio) { try { voAudio.currentTime = T; voAudio.play().catch(() => {}); } catch (e) {} }
+  syncFoot();
+}
+function stopAudio() { if (stopSound) { stopSound(); stopSound = null; } if (voAudio) voAudio.pause(); if (FOOT.video) FOOT.video.pause(); }
+function setPlaying(p) { playing = p; ui.play.textContent = p ? 'Pause' : 'Play'; last = performance.now(); if (p) startAudio(); else stopAudio(); }
+function tick(now) {
+  if (playing) {
+    T += (now - last) / 1000; last = now;
+    if (T >= DURATION) { if (loopOn) { T = 0; startAudio(); } else { T = DURATION; setPlaying(false); } }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+ui.play.addEventListener('click', () => { if (!playing && T >= DURATION) T = 0; setPlaying(!playing); });
+ui.scrub.addEventListener('input', () => { T = parseFloat(ui.scrub.value); draw(); if (playing) startAudio(); else syncFoot(); });
+ui.sound.addEventListener('click', () => { soundOn = !soundOn; ui.sound.setAttribute('aria-pressed', soundOn); ui.sound.textContent = soundOn ? 'Sound on' : 'Sound off'; if (playing) startAudio(); });
+ui.loop.addEventListener('click', () => { loopOn = !loopOn; ui.loop.setAttribute('aria-pressed', loopOn); });
+ui.vo.addEventListener('change', () => {
+  const f = ui.vo.files && ui.vo.files[0]; if (!f) return;
+  if (voAudio) { voAudio.pause(); URL.revokeObjectURL(voAudio.src); }
+  voAudio = new Audio(URL.createObjectURL(f)); ui.note.textContent = 'Voiceover loaded: ' + f.name + '. Effects use the lighter mix.';
+  if (playing) startAudio();
+});
+if (ui.foot) ui.foot.addEventListener('change', () => { const f = ui.foot.files && ui.foot.files[0]; if (!f) return; window.loadFootage(URL.createObjectURL(f)); ui.note.textContent = 'Footage loaded: ' + f.name + '.'; });
+(async () => {
+  try { await Promise.all(["900 60px \"Playfair Display\"","italic 900 60px \"Playfair Display\"","700 30px \"Playfair Display\"","700 22px \"JetBrains Mono\""].map((f) => document.fonts.load(f, 'AaZz09'))); await document.fonts.ready; } catch (e) {}
+  if (typeof setup === 'function') setup();
+  window.__posterT = 10.9; T = 10.9; draw(); window.__ready = true;
+  requestAnimationFrame((n) => { last = n; tick(n); });
+})();
+</script>

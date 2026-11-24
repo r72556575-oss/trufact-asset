@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """TruFact daily Short generator.
 
-Hindi boy voice (Gemini TTS) + English captions + 2D cartoon pictures (Gemini image) with motion,
-synthesized background music and sound effects, ~45 s vertical video, scheduled on YouTube for 07:00 IST.
+Hindi boy voice (Gemini TTS) + English captions + the "Low-Poly Atlas" 3D style (Three.js map, routes that draw themselves,
+synthesized sound score), ~45 s vertical video, scheduled on YouTube for 07:00 IST.
 Runs on GitHub Actions (see .github/workflows/daily.yml). Nothing needs to be typed by a human.
 """
 import os, sys, json, math, base64, time, random, wave, subprocess, datetime, re, asyncio
 import numpy as np
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-import toon, scenes, kitpost
+import atlas
 
 # ----------------------------------------------------------------------------- config
 SR = 24000
@@ -233,8 +233,8 @@ def make_script(hist):
     if not extract: raise RuntimeError("no usable Wikipedia topic found")
     research = f"Wikipedia article '{title}':\n{extract[:7500]}"
     log("topic:", title, "| extract chars:", len(extract))
-    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}: a gripping true history story built around a ROUTE (a march, journey, voyage, escape or campaign across real places), told the way a history atlas would: where it started, the named places along the way with dates, the key obstacle, the clever move or turning point, and where it ended. Use real dates, place names and distances (say 'about' for estimates) and one number that adds up (km, days, soldiers or ships); never invent numbers.
-Use ONLY facts that are stated in this source text (do not add outside facts):
+    prompt = f"""You write a 45-second YouTube Short for the channel {CHANNEL}: a gripping true history story built around a ROUTE (a march, journey, voyage, escape or campaign across real places), told the way a history atlas would: where it started, the named places along the way with dates, the key obstacle, the clever move or turning point, and where it ended. It will be shown as a 3D low-poly MAP: a line draws itself from place to place, a red arrow marches along it, name tags and dates pop up, and a counter adds up one number. Use real dates, place names and distances (say 'about' for estimates); never invent numbers.
+Use ONLY facts that are stated in this source text (do not add outside facts). The only exception: the approximate latitude and longitude of the named real places, which you give from general geographic knowledge:
 {research}
 
 LEARNINGS FROM THIS CHANNEL'S REAL VIEW NUMBERS (apply them):
@@ -244,26 +244,24 @@ Return JSON with this exact shape:
 {{"title": "<Hindi (Devanagari) or Hinglish title, max 60 chars, exactly ONE emoji, built like the best titles of this channel: a direct question or a shock plus a number or the impossible odds; do not reveal the trick; no clickbait lies>",
   "description": "<2-3 Hindi sentences that tease the story and END WITH A QUESTION asking viewers to comment, then 5 hashtags including #Shorts>",
   "tags": ["<10 short tags, mix of Hindi and English>"],
-  "beats": [ {{"hindi": "...", "english": "...", "sfx": "whoosh|pop|none", "light": "day|golden|night|fog",
-               "camera": "medium|close|two|wide|pull|low|pan_l|pan_r|push",
-               "actors": [ {{"uniform": "roman|knight|samurai|indian|mongol|chinese|us_ww2|jp_ww2|uk_ww2|officer|villager|elder", "team": "A|B",
-                             "slot": "far_left|left|center|right|far_right", "expr": "neutral|stern|stubborn|nervous|shock|squint|grin|smile|laugh",
-                             "pose": "idle|point|cheer|think|worry|command|cross|wave|thumb|talk", "enter": "none|walk_left|walk_right"}} ],
-               "fx": ["exclaim|question|stars|dust|sweat"], "shake": false, "flash": false,
-               "panel": null }} ]}}
+  "title_lines": ["<English headline line 1, max 14 characters, e.g. Hannibal's>", "<English headline line 2, max 14 characters, e.g. Alps March>"],
+  "date_chip": "<UPPER CASE English, max 30 chars: the year and the route, e.g. 218 BC · SPAIN TO ITALY>",
+  "route": [ {{"name": "<real place, English, max 14 chars>", "lat": 0.0, "lon": 0.0, "date": "<real date or year of arriving there, max 14 chars, or empty>"}} ],
+  "extra": [ ],
+  "arrow_label": "<UPPER CASE, max 22 chars, who or what marches, with a number if the source gives one, e.g. 37 ELEPHANTS>",
+  "counter": {{"value": 0, "unit": "<km|days|soldiers|ships|miles>", "label": "<UPPER CASE English, max 26 chars, what the number counts, e.g. MARCH TO ITALY>", "about": true}},
+  "take_lines": ["<English takeaway line 1, max 16 chars>", "<English takeaway line 2, max 16 chars, last word is the punch>"],
+  "beats": [ {{"hindi": "...", "english": "..."}} ]}}
 
 Rules:
+- "route": 4 to 6 real places IN TRAVEL ORDER (start place first, destination last), at least 80 km apart from each other, each named in the source. lat and lon are decimal degrees (south and west negative). "extra": optional, at most 2 side routes that the source mentions (for example a second army or the return), each {{"points": [{{"lat":..,"lon":..}}, ...]}} with 2-4 points; otherwise [].
+- "counter": ONE number that the source states (distance, days, soldiers or ships) as a plain number, with "about" true if the source says about or approximately.
 - HOOK (beat 1, the first two seconds): open with the most shocking fact, the impossible odds, or a direct question, in at most 12 Hindi words. Never a greeting, never background first. Style example: तेरह नावें... और सामने एक सौ तैंतीस! फिर भी जीत किसकी हुई?
-- SUSPENSE BUILD-UP: beats 2 and 3 raise the stakes and the question "how can they possibly win?" and beat 3 ends on a mini-cliffhanger; hold the trick back until beat 4; beat 5 shows it working step by step; beat 6 is the payoff; beat 7 calls back to the hook. Every beat should end on something that makes the viewer need the next sentence.
-- VISUALS: every beat must look clearly different from the previous one (change camera, poses, expressions, fx); show the trick in a panel; use shock + exclaim at the reveal.
-- Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever move or turning point (the key reveal), 5 how the trick worked, 6 the result, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore. 
-- "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). 
-  English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
+- SUSPENSE BUILD-UP: beats 2 and 3 raise the stakes and the question "how can they possibly win?" and beat 3 ends on a mini-cliffhanger; hold the trick back until beat 4; beat 5 shows it working step by step; beat 6 is the payoff and says the counter number out loud; beat 7 calls back to the hook. Every beat should end on something that makes the viewer need the next sentence.
+- MAP TIMING: the route starts drawing in beat 2 and reaches the destination at the end of beat 5, so beats 2 to 5 must name the places of the route in the same order as "route". Beat 6 must say the counter number. Beat 7 is the lesson and matches take_lines.
+- Exactly 7 beats = 7 short sentences, told as a gripping story: 1 hook with the impossible odds, 2 who/where/when, 3 the danger or problem, 4 the clever move or turning point (the key reveal), 5 how the trick worked, 6 the result with the number, 7 a punchy closing line about the lesson. Name the people and the place. If a detail is only legend, say 'कहा जाता है'. Be neutral and respectful to every community, no hatred, no gore.
+- "hindi": natural spoken Hindi in Devanagari for a young storyteller. Write ALL numbers and years as Hindi words (दो हज़ार, तेईस...). English technical words must be written in Devanagari (क्विकलाइम). 8-17 words per beat; total 110-125 Hindi words. No emojis.
 - "english": a faithful, natural English translation of that beat for captions, max 14 words, numbers as digits.
-- "image_prompt": the ONE main SUBJECT to draw for that beat, as a short noun phrase of 4-12 English words (e.g. "a big wooden horse on wheels", "a bull with a burning torch tied to its horns", "a mountain fort", "a war elephant", "a rolled treasure map"). Kid-friendly cartoon, no blood, no wounded people, no real people. A single physical thing, no scene, no background, no abstract ideas, no text, no real people, no violence. Use a different subject for each beat.
-- Each beat is a short cartoon SCENE in which soldiers ACT OUT what the narrator says, like a silent-film reenactment. Team A = the clever, weaker side (the heroes); team B = their opponents. Choose each uniform by the real nationality and era of that side: roman (ancient Rome/Greece/Mediterranean), knight (medieval Europe, crusaders), samurai (feudal Japan), indian (Indian kingdoms: Rajput, Maratha, Ahom, Sikh, Maurya...), mongol (Mongols, Mughals, Turks, Persians, Central Asia), chinese (ancient China, Korea, Vietnam), us_ww2 / jp_ww2 / uk_ww2 (World War II), officer (generals and officers of the 1700s-1900s, or any commander), villager / elder (civilians and advisers such as Chanakya). 1-4 actors per beat; show the heroes in most beats and the opponents when they matter; put the two sides on opposite slots (heroes left, opponents right). Reactions: shock/nervous for the surprised enemy when the trick works, laugh/grin with pose cheer for the heroes' win, squint with think or command while planning. At most one actor per beat uses "enter". Camera: wide for armies, close for one thinker, two for a face-off, pull for the opening beat, low for heroic moments, medium otherwise. Lighting: night for an ambush, fog for a surprise, golden for victory, day otherwise. fx: exclaim when the trick is revealed, question for a puzzle, stars for the win, dust for a charge, sweat for fear. Set "shake" true on the beat where the trick bursts into action and "flash" true on the final victory beat.
-- "panel": on at most 3 beats (the plan, the trick, the result) give {{"picture": "one clear drawable thing, 6-14 English words, kid-friendly cartoon, no blood", "tag": "THE TRICK"}} (tag = 2-3 words, upper case); those beats must use camera medium, two or wide. All other beats: null.
-- "sfx": "pop" if the beat has a key number, otherwise "whoosh" (use "none" at most once).
 - Be accurate. Never invent facts that are not in the source text."""
     last = None
     for attempt in range(3):
@@ -271,7 +269,14 @@ Rules:
                                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8}})
         try:
             s = json.loads(re.sub(r"^```json|```$", "", text_of(resp).strip(), flags=re.M).strip())
-            assert len(s["beats"]) == 7 and all(b["hindi"] and b["english"] and b.get("actors") for b in s["beats"])
+            assert len(s["beats"]) == 7 and all(b["hindi"] and b["english"] for b in s["beats"])
+            r = s["route"]; assert 3 <= len(r) <= 6 and all(isinstance(p.get("lat"), (int, float)) and isinstance(p.get("lon"), (int, float)) and p.get("name") for p in r)
+            assert all(-90 <= p["lat"] <= 90 and -180 <= p["lon"] <= 180 for p in r)
+            assert max(abs(p["lat"] - r[0]["lat"]) + abs(p["lon"] - r[0]["lon"]) for p in r) > 0.8, "route too short on the map"
+            s.setdefault("extra", []); s["extra"] = [e for e in s["extra"] if isinstance(e, dict) and len(e.get("points", [])) >= 2 and all(isinstance(q.get("lat"), (int, float)) and isinstance(q.get("lon"), (int, float)) for q in e["points"])][:2]
+            c = s["counter"]; assert float(c["value"]) > 0 and c.get("unit") and c.get("label")
+            assert len(s["title_lines"]) == 2 and len(s["take_lines"]) == 2 and s.get("date_chip")
+            s.setdefault("arrow_label", ""); s["seed"] = today.toordinal() % 1000
             assert re.search(r"[\u0900-\u097F]", s["beats"][0]["hindi"])
             s["wiki"] = title
             return s
@@ -280,22 +285,17 @@ Rules:
     raise RuntimeError(f"script generation failed: {last}")
 
 def offline_script():
-    H7 = ["सन् सोलह सौ इकहत्तर में, मुग़लों की विशाल सेना असम पर चढ़ आई।", "लाचित बरफूकन के पास सैनिक कम थे।", "उन्होंने नदी के किनारे रातों-रात मिट्टी की दीवार खड़ी करवाई।",
-          "दुश्मन को लगा कि यहाँ से रास्ता खुला है।", "उनका बेड़ा तंग नदी में फँस गया।", "तब असम की नावों ने चारों ओर से हमला कर दिया।", "इस तरह चालाकी ने बड़ी सेना को हरा दिया!"]
-    E7 = ["In 1671 a huge Mughal army marched on Assam.", "Lachit Borphukan had far fewer soldiers.", "So he built a mud wall by the river overnight.",
-          "The enemy thought the way was open.", "Their fleet got trapped in the narrow river.", "Then Assam's boats attacked from every side.", "Cleverness beat a giant army!"]
-    A = lambda u, slot, expr="smile", pose="idle", **k: dict(uniform=u, team="A", slot=slot, expr=expr, pose=pose, **k)
-    B = lambda u, slot, expr="stern", pose="idle", **k: dict(uniform=u, team="B", slot=slot, expr=expr, pose=pose, **k)
-    SC = [dict(camera="pull", light="day", actors=[B("mongol", "right", "stern", "ready"), B("mongol", "far_right", "grin", "ready")], fx=["dust"], panel=None),
-          dict(camera="two", light="day", actors=[A("indian", "left", "nervous", "worry"), B("mongol", "right", "grin", "cross")], fx=["sweat"], panel=None),
-          dict(camera="medium", light="night", actors=[A("indian", "center", "squint", "command")], fx=["exclaim"], panel={"picture": "a long mud wall beside a river", "tag": "THE TRICK"}),
-          dict(camera="wide", light="fog", actors=[A("indian", "far_left", "grin", "ready"), A("indian", "left", "grin", "ready"), B("mongol", "right", "shock", "worry"), B("mongol", "far_right", "shock", "worry")], fx=["question"], panel=None),
-          dict(camera="two", light="fog", actors=[A("officer", "left", "smile", "point"), B("mongol", "right", "shock", "worry")], fx=["sweat"], panel=None),
-          dict(camera="wide", light="golden", actors=[A("indian", "left", "laugh", "cheer"), A("indian", "center", "laugh", "cheer"), B("mongol", "right", "nervous", "worry")], fx=["dust"], shake=True, panel=None),
-          dict(camera="low", light="golden", actors=[A("indian", "center", "laugh", "cheer")], fx=["stars"], flash=True, panel={"picture": "a happy cartoon warrior holding a flag on a boat", "tag": "VICTORY"})]
-    return {"title": "How a Mud Wall Stopped an Empire", "description": "Test.", "tags": ["test"], "beats": [dict(hindi=h, english=e, sfx="pop" if i == 0 else "whoosh", **SC[i]) for i, (h, e) in enumerate(zip(H7, E7))]}
+    H7 = ["तीस हज़ार सैनिक और सैंतीस हाथी, और सामने आल्प्स के बर्फ़ीले पहाड़!", "दो सौ अठारह ईसा पूर्व में हैनिबल स्पेन से इटली की ओर निकला।", "रास्ते में नदियाँ थीं, कड़ाके की ठंड थी और दुश्मन भी।",
+          "फिर उसने वह किया जो कोई सोच भी नहीं सकता था: पहाड़ पार करना।", "सिरका और आग से उसने चट्टानें तोड़ीं, कहा जाता है।", "लगभग पंद्रह सौ किलोमीटर चलकर वह इटली पहुँच गया।", "हिम्मत हो तो पहाड़ भी रास्ता दे देते हैं।"]
+    E7 = ["Thirty thousand soldiers, 37 elephants, and the snowy Alps ahead!", "In 218 BC, Hannibal set out from Spain toward Italy.", "Rivers, bitter cold and enemies waited on the way.",
+          "Then he did what nobody thought possible: he crossed the mountains.", "Legend says fire and vinegar cracked the rocks.", "After about 1,500 km he reached Italy.", "With courage, even mountains make a road."]
+    return {"title": "हैनिबल ने आल्प्स कैसे पार किए? 🐘", "description": "हैनिबल की अनोखी यात्रा। आपको क्या लगता है, कैसे किया उसने? कमेंट करें। #Shorts #History #Hannibal #TruFact #Story", "tags": ["hannibal", "alps", "history"],
+            "title_lines": ["Hannibal's", "Alps March"], "date_chip": "218 BC · SPAIN TO ITALY", "seed": 3, "arrow_label": "37 ELEPHANTS",
+            "route": [{"name": "CARTHAGO NOVA", "lat": 37.6, "lon": -0.98, "date": "218 BC"}, {"name": "EBRO", "lat": 41.0, "lon": 0.85, "date": "218 BC"}, {"name": "RHONE", "lat": 43.9, "lon": 4.7, "date": "AUTUMN 218 BC"},
+                      {"name": "ALPS", "lat": 45.1, "lon": 6.9, "date": "OCT 218 BC"}, {"name": "ITALY", "lat": 45.07, "lon": 7.69, "date": "NOV 218 BC"}], "extra": [],
+            "counter": {"value": 1500, "unit": "km", "label": "MARCH TO ITALY", "about": True}, "take_lines": ["Courage beats", "the odds."],
+            "beats": [{"hindi": h, "english": e} for h, e in zip(H7, E7)], "wiki": "Hannibal's crossing of the Alps"}
 
-# ----------------------------------------------------------------------------- 2. voice
 def read_wav(path):
     with wave.open(path) as w:
         sr = w.getframerate(); assert w.getnchannels() == 1
@@ -367,214 +367,6 @@ def build_voice(beats):
     return segs
 
 # ----------------------------------------------------------------------------- 3. pictures
-def card(title, sub="", seed=0):
-    rnd = random.Random(seed)
-    c1 = rnd.choice([(255, 190, 70), (120, 200, 255), (255, 130, 120), (150, 225, 160)])
-    c2 = (30, 30, 70)
-    im = Image.new("RGB", (W, H)); px = np.zeros((H, W, 3), np.float32)
-    t = np.linspace(0, 1, H)[:, None, None]
-    px[:] = np.array(c1) * (1 - t) + np.array(c2) * t
-    im = Image.fromarray(px.astype(np.uint8)); d = ImageDraw.Draw(im)
-    for _ in range(14):
-        x, y, r = rnd.randint(0, W), rnd.randint(0, H), rnd.randint(60, 220)
-        d.ellipse([x - r, y - r, x + r, y + r], outline=(255, 255, 255), width=6)
-    if title: d.text((W // 2, H // 2 - 200), title, font=font(190), fill=(255, 255, 255), anchor="mm", stroke_width=12, stroke_fill=INK)
-    return im
-
-STYLE_TAIL = ("flat 2D cartoon sticker illustration of this single subject, bold black outlines, bright cheerful colors, cute friendly style, "
-              "centered, isolated on a plain pure white background, no scenery, no ground, no shadow, no text, no letters, no watermark")
-def style_prompt(prompt): return f"{prompt.strip()}. {STYLE_TAIL}"
-
-IMG_PROVIDERS = os.environ.get("IMG_PROVIDERS", "gemini,pollinations").split(",")
-_gemini_img_ok = True
-
-_last_poll = [0.0]
-_poll_deadline = [None]      # set when the picture phase starts: at most 12 minutes of waiting for the free service
-
-def pollinations(prompt):
-    """Free anonymous service: it answers HTTP 402/429 if called too often, so keep >=35 s between requests."""
-    import io, urllib.parse
-    q = urllib.parse.quote(style_prompt(prompt)[:700])
-    for k in range(5):
-        if _poll_deadline[0] is None: _poll_deadline[0] = time.time() + 720
-        if time.time() > _poll_deadline[0]: log('  pollinations time budget used up'); return None
-        wait = 36 - (time.time() - _last_poll[0])
-        if wait > 0: time.sleep(wait)
-        _last_poll[0] = time.time()
-        try:
-            r = requests.get(f"https://image.pollinations.ai/prompt/{q}", params={"width": 768, "height": 768, "nologo": "true", "model": "flux",
-                             "seed": random.randint(1, 10 ** 6)}, timeout=150)
-            _last_poll[0] = time.time()
-            if r.status_code == 200 and r.headers.get("content-type", "").startswith("image") and len(r.content) > 8000:
-                return Image.open(io.BytesIO(r.content)).convert("RGB")
-            log(f"  pollinations HTTP {r.status_code}, {len(r.content)} bytes (try {k+1})")
-        except Exception as e:
-            log("  pollinations error:", e)
-    return None
-
-def stub_subject(i):
-    """plain cartoon blob on white (offline tests and last-resort fallback)"""
-    im = Image.new("RGB", (768, 768), (255, 255, 255)); d = ImageDraw.Draw(im)
-    col = [(255, 120, 100), (100, 180, 255), (120, 210, 120), (255, 200, 70)][i % 4]
-    for k in range(5): d.line([(250 + k * 66, 470), (225 + k * 80, 690)], fill=INK, width=52); d.line([(250 + k * 66, 470), (225 + k * 80, 690)], fill=col, width=40)
-    d.ellipse([150, 110, 620, 540], fill=col, outline=INK, width=12)
-    for ex in (290, 480): d.ellipse([ex - 48, 250 - 52, ex + 48, 250 + 52], fill=(255, 255, 255), outline=INK, width=8); d.ellipse([ex - 18, 250 - 20, ex + 18, 250 + 20], fill=INK)
-    d.arc([300, 330, 470, 440], 15, 165, fill=INK, width=10)
-    return im
-
-def check_picture(im, want):
-    """Ask Gemini to look at the picture: is the subject recognisable and is it clean? True when unsure."""
-    if OFFLINE or not GKEY: return True
-    try:
-        import io
-        buf = io.BytesIO(); im.convert("RGB").resize((512, 512)).save(buf, "JPEG", quality=80)
-        body = {"contents": [{"parts": [{"inlineData": {"mimeType": "image/jpeg", "data": base64.b64encode(buf.getvalue()).decode()}},
-                {"text": "This picture is meant to be a kid-friendly cartoon of: '" + want + "'. Reply as JSON {\"shows_subject\": true or false, \"clean\": true or false}. shows_subject = the main subject is clearly recognisable; clean = no deformed or garbled shapes, no letters or text, no gore."}]}],
-                "generationConfig": {"responseMimeType": "application/json"}}
-        r = json.loads(text_of(gemini_text(body))); ok = bool(r.get("shows_subject")) and bool(r.get("clean")); log("  picture check for", repr(want[:40]), r); return ok
-    except Exception as e:
-        log("  picture check skipped:", e); return True
-
-def get_image(prompt, i):
-    global _gemini_img_ok
-    if OFFLINE or not GKEY: return stub_subject(i)
-    for prov in IMG_PROVIDERS:
-        if prov == "gemini" and _gemini_img_ok:
-            try:
-                resp = gemini(IMG_MODEL, {"contents": [{"parts": [{"text": style_prompt(prompt)}]}],
-                              "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "1:1"}}}, tries=1)
-                raw, _ = inline_of(resp)
-                if raw:
-                    import io
-                    log(f"  image {i+1}: gemini"); return Image.open(io.BytesIO(raw)).convert("RGB")
-            except Exception as e:
-                log(f"  gemini image unavailable ({e}); not trying it again this run"); _gemini_img_ok = False
-        elif prov == "pollinations":
-            im = pollinations(prompt)
-            if im is not None:
-                log(f"  image {i+1}: pollinations"); return im
-    log(f"  image {i+1}: no picture available, this scene runs without a prop")
-    return None
-
-# ----------------------------------------------------------------------------- 4. music + sfx (synthesized, no copyright)
-def synth_music(dur, seed):
-    rnd = random.Random(seed); n = int(dur * SR); t = np.arange(n) / SR
-    bpm = rnd.choice([100, 104, 108, 112]); beat = 60 / bpm; root = rnd.randint(0, 5)
-    midi = lambda m: 440 * 2 ** ((m - 69) / 12)
-    prog = [(57, [0, 3, 7]), (53, [0, 4, 7]), (60, [0, 4, 7]), (55, [0, 4, 7])]   # Am F C G
-    out = np.zeros(n, np.float32)
-    def add(sig, start):
-        s = int(start * SR); e = min(n, s + len(sig))
-        if s < n: out[s:e] += sig[:e - s]
-    # drums
-    k_t = np.arange(int(0.18 * SR)) / SR
-    kick = np.sin(2 * np.pi * (45 * k_t + (90 / 28) * (1 - np.exp(-k_t * 28)))) * np.exp(-k_t * 18) * 0.55
-    hat = (np.random.RandomState(seed).randn(int(0.05 * SR))); hat = np.diff(hat, prepend=0) * np.exp(-np.arange(len(hat)) / SR * 90) * 0.12
-    bars = int(dur / (4 * beat)) + 2
-    for bar in range(bars):
-        base, tones = prog[bar % 4]; base += root
-        t0 = bar * 4 * beat
-        for b in range(4):
-            tb = t0 + b * beat
-            if bar >= 1 or b >= 2: add(kick, tb)
-            add(hat, tb + beat / 2)
-        # pad
-        pt = np.arange(int(4 * beat * SR)) / SR
-        env = np.minimum(1, pt / 0.4) * np.minimum(1, (4 * beat - pt) / 0.3)
-        pad = sum(np.sin(2 * np.pi * midi(base - 12 + q) * pt) + 0.5 * np.sin(2 * np.pi * midi(base - 12 + q) * 2 * pt) for q in tones) * env * 0.045
-        add(pad, t0)
-        # bass
-        bt = np.arange(int(beat * SR)) / SR
-        for b in (0, 2):
-            add(np.sin(2 * np.pi * midi(base - 24) * bt) * np.exp(-bt * 3.2) * 0.32, t0 + b * beat)
-        # arpeggio (8th notes)
-        for s8 in range(8):
-            q = tones[(s8 * 2 + (bar % 2)) % 3] + (12 if s8 % 4 >= 2 else 0)
-            nt = np.arange(int(beat * 0.5 * SR)) / SR; f = midi(base + 12 + q)
-            tri = (2 / np.pi) * np.arcsin(np.sin(2 * np.pi * f * nt))
-            add(tri * np.exp(-nt * 9) * 0.11, t0 + s8 * beat / 2)
-    out *= np.minimum(1, t / 0.8) * np.minimum(1, (dur - t) / 2.0)
-    return out / max(np.abs(out).max(), 1e-6)
-
-def sfx(kind):
-    if kind == "whoosh":
-        n = int(0.6 * SR); noise = np.random.RandomState(3).randn(n); y = np.zeros(n); a_prev = 0.0
-        for i in range(n):
-            p = i / n; alpha = 0.02 + 0.55 * math.sin(math.pi * p) ** 2
-            a_prev += alpha * (noise[i] - a_prev); y[i] = a_prev
-        env = np.sin(np.pi * np.linspace(0, 1, n)) ** 1.5
-        return (y * env / max(np.abs(y * env).max(), 1e-6) * 0.9).astype(np.float32)
-    if kind == "pop":
-        t = np.arange(int(0.16 * SR)) / SR
-        return (np.sin(2 * np.pi * (700 * np.exp(-t * 14) + 180) * t) * np.exp(-t * 22)).astype(np.float32)
-    if kind == "ding":
-        t = np.arange(int(1.2 * SR)) / SR
-        return ((np.sin(2 * np.pi * 1318 * t) + 0.5 * np.sin(2 * np.pi * 1976 * t) + 0.25 * np.sin(2 * np.pi * 2637 * t)) * np.exp(-t * 3.2) * 0.5).astype(np.float32)
-    return np.zeros(10, np.float32)
-
-def mix_audio(durs, starts, speech, total_sec, sfx_plan, seed):
-    n = int(total_sec * SR)
-    voice = np.zeros(n, np.float32)
-    for st, sp in zip(starts, speech): voice[int(st * SR): int(st * SR) + len(sp)] += sp / 32768
-    # duck the music under the voice
-    win = int(0.05 * SR); env = np.sqrt(np.convolve(voice ** 2, np.ones(win) / win, mode="same"))
-    env = np.convolve(np.minimum(1, env / 0.08), np.ones(int(0.25 * SR)) / int(0.25 * SR), mode="same")
-    music = synth_music(total_sec, seed)[:n] * (0.30 - 0.20 * env)
-    fx = np.zeros(n, np.float32)
-    for kind, tt in sfx_plan:
-        s = sfx(kind); st = int(max(tt, 0) * SR)
-        if st < n: e = min(n, st + len(s)); fx[st:e] += s[:e - st] * 0.55
-    mix = voice * 1.0 + music + fx
-    mix = np.tanh(mix * 1.15) * 0.92
-    return mix.astype(np.float32)
-
-# ----------------------------------------------------------------------------- 5. video
-def make_groups(beat_idx, text, t0, t1):
-    words = text.split(); wts = [len(w) + 2 for w in words]; tot = sum(wts); acc = 0; times = []
-    for w, k in zip(words, wts):
-        times.append((t0 + (t1 - t0) * acc / tot, t0 + (t1 - t0) * (acc + k) / tot)); acc += k
-    groups, cur = [], []
-    for i, w in enumerate(words):
-        cur.append(i)
-        if len(cur) >= 3 or w.endswith((",", ".", "?", "!")) or i == len(words) - 1:
-            groups.append(cur); cur = []
-    if len(groups) > 1 and len(groups[-1]) == 1 and len(groups[-2]) <= 3: groups[-2] += groups.pop()
-    out = []
-    for gi, g in enumerate(groups):
-        nxt = times[groups[gi + 1][0]][0] if gi + 1 < len(groups) else t1 + 0.25
-        out.append({"words": [words[j].upper() for j in g], "times": [times[j] for j in g], "t0": times[g[0]][0] - 0.03, "t1": nxt})
-    return out
-
-def caption_img(g, active, scale=1.0):
-    words = g["words"]; size = 100
-    while True:
-        f = font(size); sp = f.getlength(" "); ws = [f.getlength(w) for w in words]
-        if sum(ws) + sp * (len(words) - 1) <= 940 or size <= 52: break
-        size -= 4
-    total = sum(ws) + sp * (len(words) - 1)
-    lay = Image.new("RGBA", (W, 240), (0, 0, 0, 0)); d = ImageDraw.Draw(lay); x = (W - total) / 2
-    for i, (w, ww) in enumerate(zip(words, ws)):
-        d.text((x, 120), w, font=f, fill=(255, 226, 70) if i == active else (255, 255, 255), anchor="lm", stroke_width=11, stroke_fill=INK)
-        x += ww + sp
-    if abs(scale - 1) > 0.01:
-        lay = lay.resize((int(W * scale), int(240 * scale)), Image.LANCZOS)
-        full = Image.new("RGBA", (W, 240), (0, 0, 0, 0)); full.alpha_composite(lay, ((W - lay.width) // 2, (240 - lay.height) // 2)); lay = full
-    return lay
-
-def number_of(beat):
-    m = re.search(r"\d[\d,\.]*%?", beat.get("english", ""))
-    return m.group(0).rstrip(".,")[:6] if m else ""
-
-def lip_amplitude(starts, segs, total):
-    n = int(total * SR); voice = np.zeros(n, np.float32)
-    for st, sp in zip(starts, segs): voice[int(st * SR): int(st * SR) + len(sp)] += np.abs(sp) / 32768
-    hop = SR // FPS; nfr = int(total * FPS) + 2
-    a = np.array([voice[i * hop:(i + 1) * hop].mean() if len(voice[i * hop:(i + 1) * hop]) else 0 for i in range(nfr)])
-    a = np.clip(a / (np.percentile(a[a > 0.002], 90) + 1e-6), 0, 1) if (a > 0.002).any() else a
-    a = np.convolve(a, np.ones(3) / 3, mode="same"); a[a < 0.12] = 0
-    return a
-
-# ----------------------------------------------------------------------------- 6. publish via Zapier MCP (verified YouTube client)
 def next_publish_utc():
     ist = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
     now = datetime.datetime.now(ist)
@@ -649,10 +441,7 @@ def main():
     log("TITLE:", script["title"])
     if os.environ.get("ANALYZE_ONLY") == "1":
         log("BEATS:", json.dumps([b["english"] for b in script["beats"]], ensure_ascii=False)); log("analysis only: stopping before the video"); return
-    hero = next((x for bb in script["beats"] for x in bb.get("actors", []) if x.get("team", "A") == "A" and x.get("uniform") not in ("villager", "elder")), {"uniform": "roman"})["uniform"]
-    cta = {"hindi": "ऐसे ही हैरान करने वाली कहानियों के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new story every day!",
-           "sfx": "ding", "brand": True, "light": "golden", "camera": "medium", "fx": ["stars"], "flash": True,
-           "actors": [{"uniform": hero, "team": "A", "slot": "left", "expr": "laugh", "pose": "cheer"}, {"uniform": hero, "team": "A", "slot": "center", "expr": "laugh", "pose": "cheer"}, {"uniform": hero, "team": "A", "slot": "right", "expr": "laugh", "pose": "cheer"}], "panel": None}
+    cta = {"hindi": "ऐसे ही हैरान करने वाली कहानियों के लिए, ट्रू फैक्ट को फ़ॉलो करें।", "english": f"Follow {CHANNEL} for a new story every day!"}
     beats = script["beats"] + [cta]
     segs = build_voice(beats)
     speech_sec = [len(s) / SR for s in segs]
@@ -672,41 +461,21 @@ def main():
         beats[i]["speech"] = sp
     total = t
     log(f"  speech {sum(speech_sec):.1f}s, total video {total:.1f}s")
-    sfx_plan = [("whoosh", starts[i] - 0.15) for i in range(1, len(beats) - 1)] + \
-               [("pop", starts[i] + 0.05) for i in range(len(beats) - 1) if beats[i].get("sfx") == "pop"] + [("ding", starts[-1] + 0.05)]
-    audio = mix_audio(durs, starts, segs, total, sfx_plan, seed=datetime.date.today().toordinal())
-    write_wav(os.path.join(OUT, "audio.wav"), audio * 32767)
-    # ---- storyboard for the kit engine (frames are exact: voice timing -> frame ranges)
-    FPSK = 30; ntot = int(round(total * FPSK)); sb = []
-    for i, b in enumerate(beats):
-        a_ = int(round(starts[i] * FPSK)); e_ = ntot - 1 if i == len(beats) - 1 else int(round((starts[i] + durs[i]) * FPSK)) - 1
-        sb.append({"a": a_, "b": max(a_, e_), "light": b.get("light", "day"), "camera": b.get("camera", "medium"), "actors": b.get("actors", []), "fx": b.get("fx") or [],
-                   "shake": bool(b.get("shake")), "flash": bool(b.get("flash"))})
-    sbp = os.path.join(OUT, "storyboard.json"); json.dump({"fps": FPSK, "total": ntot, "beats": sb}, open(sbp, "w"), ensure_ascii=False)
-    # ---- panels: the picture of the trick, shown in a frame at the top
-    panels = {}
-    for i, b in enumerate(beats):
-        pn = b.get("panel")
-        if isinstance(pn, dict) and pn.get("picture"):
-            im = get_image(pn["picture"], i)
-            if im is not None and not check_picture(im, pn["picture"]):
-                log(f"  panel beat {i+1}: picture not good enough, trying once more")
-                im2 = get_image(pn["picture"] + ", very simple, one clear object, centered, plain background", i)
-                im = im2 if (im2 is not None and check_picture(im2, pn["picture"])) else None
-            if im is not None: panels[i] = kitpost.make_panel(im, str(pn.get("tag") or "")[:18].upper()); log(f"  panel beat {i+1}: picture ok")
-            else: log(f"  panel beat {i+1}: no picture, scene runs without the panel")
-    groups = []
-    for i, b in enumerate(beats): groups += [dict(g, beat=i) for g in make_groups(i, b["english"], starts[i] + 0.02, starts[i] + b["speech"])]
-    engine = os.environ.get("ENGINE_DIR", "engine"); fdir = os.path.join(OUT, "frames"); kstep = int(os.environ.get("KIT_STEP", "2"))
-    kitpost.render_frames(engine, sbp, fdir, ntot, procs=int(os.environ.get("KIT_PROCS", "4")), step=kstep)
-    kitpost.compose(fdir, os.path.join(OUT, "short.mp4"), os.path.join(OUT, "audio.wav"), ntot, kstep, sb, panels, groups, caption_img, len(beats) - 1, CHANNEL)
+    # voice-only track: the Low-Poly Atlas sound score (drums, pad, quill, steps, ticks, horn) is rendered in the browser and mixed under it
+    nvo = int(total * SR); voice = np.zeros(nvo, np.float32)
+    for st, sp in zip(starts, segs):
+        i0 = int(st * SR); seg = sp[: max(0, nvo - i0)]; voice[i0: i0 + len(seg)] += seg / 32768
+    write_wav(os.path.join(OUT, "voice.wav"), np.clip(voice, -1, 1) * 32767)
+    story = atlas.make_story(script, starts, speech_sec, total, brand=CHANNEL)
+    json.dump(story, open(os.path.join(OUT, "story.json"), "w"), ensure_ascii=False)
+    atlas.render_video(story, os.environ.get("ATLAS_WEB", "atlas_node/web"), os.path.join(OUT, "work"), os.path.join(OUT, "voice.wav"), os.path.join(OUT, "short.mp4"),
+                       procs=int(os.environ.get("KIT_PROCS", "4")), log=log)
     log("rendered", os.path.join(OUT, "short.mp4"))
     if OFFLINE or os.environ.get("SKIP_UPLOAD") == "1": log("upload skipped"); return
     res = publish(os.path.join(OUT, "short.mp4"), script)
     mv = re.search(r'"(?:id|videoId)"\s*:\s*"([A-Za-z0-9_-]{11})"', res or "")
     hist["topics"].append({"date": str(datetime.date.today()), "title": script["title"], "wiki": script.get("wiki"), "video_id": mv.group(1) if mv else None, "hook": beats[0]["english"],
-                           "beats": [b["english"] for b in script["beats"]], "uniforms": sorted({a.get("uniform") for b in script["beats"] for a in b.get("actors", []) if a.get("uniform")}),
-                           "panels": [b["panel"]["picture"] for b in script["beats"] if isinstance(b.get("panel"), dict)]}); hist["topics"] = hist["topics"][-300:]
+                           "beats": [b["english"] for b in script["beats"]], "places": [p["name"] for p in script["route"]]}); hist["topics"] = hist["topics"][-300:]
     json.dump(hist, open(HIST, "w"), indent=1, ensure_ascii=False)
     log("done")
 
