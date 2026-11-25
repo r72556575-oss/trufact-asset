@@ -2,90 +2,101 @@
  "date": "2026-11-25",
  "weak_videos": [
   {
-   "title": "This Is How TATA Became India's Most Powerful Business Empire 🚀Description:",
-   "views": 58,
+   "title": "78 लोग और ब्रिटिश साम्राज्य की हार? 😱",
+   "views": 7,
    "likely_reasons": [
-    "Title is too long and includes the word 'Description:' which looks like a copy-paste error.",
-    "Topic is over-saturated on YouTube Shorts.",
-    "Despite having a thumbnail, the hook in the title is generic and lacks a curiosity gap."
+    "Topic feels like a school history lesson rather than a 'fact' discovery",
+    "Recent upload (1.9 days) suggests it hasn't hit the Shorts Feed algorithm yet",
+    "Lack of a custom thumbnail compared to the channel's top-performing videos"
    ]
   },
   {
-   "title": "Photosynthesis Explained #shorts",
-   "views": 28,
+   "title": "How Sacred Cats Won an Ancient Battle",
+   "views": 13,
    "likely_reasons": [
-    "Topic is too academic and 'textbook' for a general entertainment audience.",
-    "Lack of emojis in the title makes it look less engaging compared to top performers.",
-    "No curiosity gap; the viewer knows exactly what they will see and chooses to skip."
+    "Pure English title on a predominantly Hindi-interest channel",
+    "Niche foreign history topic lacks local relevance for an Indian audience",
+    "No custom thumbnail to attract clicks in the 'Suggested' or 'Search' areas"
    ]
   },
   {
    "title": "The Incredible Power of the Mantis Shrimp",
    "views": 24,
    "likely_reasons": [
-    "Niche nature topic that doesn't resonate with the channel's core interest in geopolitics and India.",
-    "English-only title without emojis or a custom thumbnail.",
-    "Low 'shareability' factor compared to ranking videos."
+    "Nature/Science topics are underperforming compared to Geopolitics/India-centric content",
+    "Title is descriptive but lacks a curiosity gap or 'shock' factor",
+    "Missing emojis which are present in 100% of the top 5 videos"
    ]
   },
   {
-   "title": "Romans' Concrete HEALS ITSELF 🤯 #Shorts",
-   "views": 29,
+   "title": "Photosynthesis Explained #shorts",
+   "views": 28,
    "likely_reasons": [
-    "Western-centric history often underperforms compared to Indian-centric history on this channel.",
-    "The hook is a statement rather than a question or a challenge to the viewer."
+    "Too academic; users on Shorts seek entertainment/mystery, not classroom lectures",
+    "The word 'Explained' is a low-click trigger for the Shorts demographic",
+    "Lack of a 'Hook' in the title to signal why this matters now"
+   ]
+  },
+  {
+   "title": "This Is How TATA Became India's Most Powerful Business Empire 🚀",
+   "views": 58,
+   "likely_reasons": [
+    "Extreme outlier: 59 days old with only 58 views suggests the algorithm rejected the initial retention rate",
+    "Title is too long and the 'Description:' text was accidentally left in the title",
+    "Despite a strong topic (TATA), the execution likely failed to grab attention in the first 3 seconds"
    ]
   }
  ],
  "what_works": [
-  "India-centric rankings (Highest earning cities, Powerful countries) are the top performers.",
-  "Hindi titles or Hinglish titles (Hindi text + English keywords) significantly outperform pure English titles.",
-  "Videos between 45-52 seconds seem to be the 'sweet spot' for the algorithm on this channel.",
-  "Using 'Shock' emojis (😱, 😲) and custom thumbnails correlates with views above 1,500."
+  "Geopolitics and India-centric rankings (Highest earning cities, Powerful countries)",
+  "Mystery and War history (1962 War, Mystery tags)",
+  "Hinglish or Hindi titles with heavy emoji usage (😱, 🇮🇳, 🔥)",
+  "Custom thumbnails: The top 11 videos all utilize custom thumbnails",
+  "Duration between 40-50 seconds: Allows enough time for a story build-up without losing pace"
  ],
  "diagnosis": {
-  "hook": "Weak videos use 'Statement Hooks' (e.g., 'Photosynthesis Explained') instead of 'Curiosity Hooks' (e.g., 'भारत किस नंबर पर है?'). The best videos ask a question or promise a ranking.",
-  "buildup": "The data shows that 'Top 5' or list-based structures (Cities, Countries, Missiles) keep viewers engaged longer than single-topic deep dives like the TATA video.",
-  "visuals": "There is a clear drop in performance for videos without custom thumbnails. Recent history videos (Chola, British Raj) are currently underperforming, likely due to the lack of a visual 'click-bait' element.",
-  "titles_topics": "Geopolitics and National Pride (India vs China, India's power) are the strongest topics. Science and Biology (Shrimp, Photosynthesis) are the weakest.",
-  "other": "Videos published between 7:00 AM and 9:00 AM IST show more consistent growth than those published in the late afternoon."
+  "hook": "Weak videos use 'Explained' or generic descriptions. Strong videos use 'Mystery', 'Top 5', or direct questions like 'Bharat kis number par hai?'",
+  "buildup": "Educational topics (Photosynthesis) lack the 'Beats' found in the scripts of successful videos. There is no tension or 'enemy' to overcome.",
+  "visuals": "There is a direct correlation between 'No Custom Thumbnail' and 'Under 100 views' in the recent data batch.",
+  "titles_topics": "The audience ignores niche world history (Myeongnyang, Romans) and favors Indian pride or global power dynamics.",
+  "other": "The 'hour_ist' data shows that 7 AM to 9 AM is a consistent sweet spot for the channel's high-performers."
  },
  "playbook": {
   "hook_rules": [
-   "Must start with a question in Hindi (e.g., 'क्या आपको पता है...?').",
-   "Mention 'India' or 'Bharat' in the first 3 seconds.",
-   "Use a 'Negative Hook' occasionally (e.g., 'Google पर ये कभी सर्च मत करना').",
-   "The first frame must have text that contradicts common knowledge.",
-   "Always use at least one 'Shock' or 'Fire' emoji in the first 20 characters."
+   "Start with a 'Did you know' question specifically about India",
+   "Use 'Shocking' or 'Mystery' in the first 3 seconds",
+   "Immediately show a visual contrast (e.g., Rich vs Poor, Then vs Now)",
+   "Use a 'Negative Hook' (e.g., 'Don't search this on Google')",
+   "Address the viewer directly as 'Aap'"
   ],
   "buildup_rules": [
-   "Use the 'Countdown' method (5, 4, 3, 2, 1) to force retention.",
-   "Every 10 seconds, introduce a new 'fact layer' to prevent swiping.",
-   "Use a 'Bridge' sentence halfway through (e.g., 'लेकिन असली ट्विस्ट तो अब आएगा').",
-   "Keep the background music's BPM high to maintain energy."
+   "Introduce a conflict or a 'But' moment at the 15-second mark",
+   "Use fast-paced background music that swells during the climax",
+   "Include at least 3 surprising micro-facts before the conclusion",
+   "Keep the 'reveal' for the final 5 seconds to maximize retention"
   ],
   "visual_rules": [
-   "Custom thumbnails are mandatory; use high-contrast faces or flags.",
-   "Text overlays must be large, bold, and yellow/white for readability.",
-   "Change the visual on screen every 2-3 seconds minimum.",
-   "Use split-screen visuals if the topic is a comparison (India vs China)."
+   "Custom thumbnails are mandatory; use high-contrast red/yellow text",
+   "Add large on-screen captions for every word spoken",
+   "Use split-screen visuals if the topic is a comparison (India vs China)",
+   "Ensure the first frame is a high-quality, recognizable face or map"
   ],
   "title_rules": [
-   "Mix Hindi script with English keywords (Hinglish).",
-   "Keep titles under 60 characters to avoid truncation.",
-   "Include a 'Challenge' (e.g., '99% लोग नहीं जानते').",
-   "Never use 'Description:' or technical tags in the visible title area."
+   "Use 'Hinglish' (Hindi script + English keywords)",
+   "Always include at least 2 emojis (one being 😱 or 🇮🇳)",
+   "Keep titles under 50 characters to avoid truncation",
+   "Include a 'Curiosity Gap' (e.g., 'The reason will shock you')"
   ],
   "topic_rules": [
-   "Focus on 'India vs The World' geopolitics.",
-   "Focus on 'Unknown Indian History' (Wars, Kings).",
-   "Focus on 'Wealth and Money' (Richest cities, Business secrets)."
+   "Focus on Indian Geopolitics (Border issues, Military strength)",
+   "Rankings and Comparisons (Top 5, India vs World)",
+   "Hidden History/Dark Secrets of famous Indian landmarks"
   ],
   "avoid": [
-   "Avoid pure academic science topics.",
-   "Avoid Western-only history without an Indian connection.",
-   "Avoid publishing without a custom thumbnail.",
-   "Avoid titles that explain the whole story (No spoilers)."
+   "Avoid pure English titles for educational/science topics",
+   "Stop posting 'Explained' style content; switch to 'Storytelling' style",
+   "Do not leave technical text like 'Description:' in the title",
+   "Avoid niche international history that doesn't involve India"
   ]
  }
 }
