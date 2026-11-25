@@ -1,5 +1,5 @@
 name: kit-daily
-# Roman-concrete style (2D cartoon soldiers in a 3D world), war-jugaad stories.
+# Low-Poly Atlas style (3D low-poly map, routes that draw themselves, red campaign arrow), route-based history stories.
 # 03:00 IST every day: build + upload as private with publishAt = 07:00 IST the same morning.
 on:
   schedule:
@@ -48,25 +48,29 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Python packages
         run: pip install -r requirements.txt
-      - name: Cartoon engine (Node, Playwright, three.js)
-        working-directory: engine
+      - name: Atlas engine (Node, Playwright, three.js r128, fonts)
+        working-directory: atlas_node
         run: |
           npm init -y >/dev/null
-          npm i playwright@1.49.1 three@0.160.0 >/dev/null 2>&1
-          mkdir -p web/lib && cp node_modules/three/build/three.module.js web/lib/
+          npm i playwright@1.49.1 three@0.128.0 @fontsource/playfair-display @fontsource/jetbrains-mono >/dev/null 2>&1
+          mkdir -p web/lib web/fonts
+          cp node_modules/three/build/three.min.js web/lib/
+          F=node_modules/@fontsource/playfair-display/files
+          cp $F/playfair-display-latin-700-normal.woff2 $F/playfair-display-latin-900-normal.woff2 $F/playfair-display-latin-900-italic.woff2 web/fonts/
+          J=node_modules/@fontsource/jetbrains-mono/files
+          cp $J/jetbrains-mono-latin-500-normal.woff2 $J/jetbrains-mono-latin-700-normal.woff2 web/fonts/
           npx playwright install --with-deps chromium 2>&1 | tail -2
       - name: Make the video and schedule it
         shell: bash
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
           PRIVATE_ONLY: ${{ inputs.private_only && '1' || '0' }}
           ANALYZE_ONLY: ${{ inputs.analyze_only && '1' || '0' }}
           PUBLISH_AT_IST: ${{ inputs.publish_at_ist }}
-          ENGINE_DIR: engine
+          ATLAS_WEB: atlas_node/web
           KIT_PROCS: "4"
         run: |
           ok=0
