@@ -63,7 +63,8 @@ jobs:
       - name: Make the video and schedule it
         shell: bash
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ZAPIER_MCP_TOKEN: ${{ secrets.ZAPIER_MCP_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SKIP_UPLOAD: ${{ inputs.skip_upload && '1' || '0' }}
