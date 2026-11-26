@@ -2,106 +2,151 @@
  "date": "2026-11-26",
  "weak_videos": [
   {
-   "title": "YzmwjyXf7lM",
+   "title": "78 लोग और ब्रिटिश साम्राज्य की हार? 😱",
    "views": 7,
    "likely_reasons": [
-    "Extremely low distribution and new upload age (2.2 days), meaning YouTube's algorithm hasn't pushed it yet or tested it with a tiny seed audience.",
-    "Lack of custom thumbnail limits initial click-through rate (CTR) on the Shorts feed shelf.",
-    "Generic historical framing that fails to instantly capture a broad audience within the first 1-2 seconds of discovery."
+    "Script hook relies on a slow rhetorical question ('Can just 78 people alone...') instead of naming Mahatma Gandhi or the Dandi March upfront.",
+    "Very low account age (2.9 days) means algorithm testing may still be early, but opening velocity is sluggish.",
+    "Missing a custom thumbnail (has_custom_thumbnail: false) weakens browse/channel page click-through."
    ]
   },
   {
-   "title": "0IET1S3K5SQ",
-   "views": 20,
+   "title": "How Sacred Cats Won an Ancient Battle",
+   "views": 13,
    "likely_reasons": [
-    "Very low view count due to being newly published (3.2 days) with limited initial algorithmic momentum.",
-    "Missing custom thumbnail leads to a drop in feed CTR compared to top-performing hits.",
-    "Niche historical topic (Chola Empire) might have a narrower immediate appeal on a general facts channel compared to broader contemporary or high-impact geographic topics."
+    "Title is purely in English with no emojis, alienating the channel's core Hindi-speaking audience.",
+    "Obscure niche topic with weak cultural relevance to the Indian Shorts demographic.",
+    "No custom thumbnail attached."
    ]
   },
   {
-   "title": "07nfHq4q5zc",
-   "views": 20,
+   "title": "The Impossible Sea Battle of Myeongnyang",
+   "views": 21,
    "likely_reasons": [
-    "English title on a Hindi-targeted channel or mixed audience dynamic reduces local relevance and immediate comprehension.",
-    "Absence of custom thumbnail hurts visual hook on the Shorts feed.",
-    "Foreign historical topic lacks immediate local curiosity compared to Indian historical milestones."
+    "Obscure Korean naval battle with zero name recognition in Hindi Shorts feed.",
+    "English title lacks emotional curiosity, high-stakes stakes, or recognizable hooks.",
+    "No custom thumbnail to grab feed attention."
    ]
   },
   {
-   "title": "UjNIpiYAchg",
+   "title": "CHOLA EMPIRE ने गंगा को कैसे जीता? 🚩",
+   "views": 22,
+   "likely_reasons": [
+    "Script hook opens with a wordy question ('Can a South Indian king conquer the Ganges after marching 2500 kilometers on foot?') instead of punchy visual drama.",
+    "Pacing lists historical names (Indraratha, Araiyan, Dharmapala) in quick succession without building human tension or conflict.",
+    "No custom thumbnail despite having a high-potential historical topic."
+   ]
+  },
+  {
+   "title": "The Incredible Power of the Mantis Shrimp",
    "views": 24,
    "likely_reasons": [
-    "Generic animal fact topic ('Mantis Shrimp') which is oversaturated across YouTube Shorts.",
-    "English-only title language misses the core Hindi-speaking audience demographic of TruFact.",
-    "No custom thumbnail and low initial view velocity signal poor algorithmic pick-up."
+    "Standard English wildlife trivia topic disconnected from channel's geopolitical/Indian focus.",
+    "Dry Wikipedia-style headline with no emoji or dramatic payoff.",
+    "No custom thumbnail."
    ]
   },
   {
-   "title": "AdHfPG18AZo",
+   "title": "Photosynthesis Explained #shorts",
    "views": 28,
    "likely_reasons": [
-    "Educational/school textbook topic ('Photosynthesis Explained') that lacks entertainment, shock value, or curiosity loops.",
-    "Completely blank description and zero tags hinder search and recommendation indexing.",
-    "No custom thumbnail results in a bland visual presentation on the Shorts shelf."
+    "Sounds like an academic high-school textbook chapter rather than viral entertainment.",
+    "Zero urgency or intrigue in title.",
+    "Empty description (0 chars) and 0 tags indicate minimal metadata optimization."
    ]
   },
   {
-   "title": "bEDbIMxF3jw",
+   "title": "Romans' Concrete HEALS ITSELF 🤯 #Shorts",
    "views": 29,
    "likely_reasons": [
-    "Despite a high like percentage (13.8%), the initial impression click-through rate was likely bottlenecked by a missing custom thumbnail.",
-    "Niche scientific topic ('Romans' Concrete') appeals only to a subset of viewers unless framed with extreme everyday relevance."
+    "Niche engineering/ancient tech topic framed in English without mass appeal for the audience base.",
+    "No custom thumbnail."
+   ]
+  },
+  {
+   "title": "This Is How TATA Became India's Most Powerful Business Empire 🚀Description:",
+   "views": 58,
+   "likely_reasons": [
+    "Unprofessional title error: uploaded with literal text 'Description:' copy-pasted onto the end.",
+    "Published at 12:00 PM IST (off-peak compared to the top performers posted between 6:00-9:00 AM IST).",
+    "Despite high likes ratio (5.2%), the title error damaged initial click trust."
+   ]
+  },
+  {
+   "title": "How a Mud Wall Stopped an Empire",
+   "views": 59,
+   "likely_reasons": [
+    "Overly abstract title in English that fails to specify which empire or why the viewer should care.",
+    "No thumbnail, no emojis, flat metadata."
+   ]
+  },
+  {
+   "title": "Secrets of the Burj Khalifa",
+   "views": 76,
+   "likely_reasons": [
+    "Oversaturated topic across Shorts with no fresh unique angle provided in title.",
+    "English title on a Hindi-audience channel without emotional or dramatic framing."
+   ]
+  },
+  {
+   "title": "The Battle of Colachel: How Local Divers Sunk a Navy",
+   "views": 78,
+   "likely_reasons": [
+    "High potential Indian history topic ruined by textbook English title instead of Hindi/Hinglish pride angle (e.g., 'जब भारतीय गोताखोरों ने डच नौसेना को डुबो दिया').",
+    "No custom thumbnail."
    ]
   }
  ],
  "what_works": [
-  "Hindi and mixed-language titles with high-emotion emojis (e.g., 😲, 😱, 🔥) consistently dominate the top view tiers (e.g., kAJSO4Uy3ZE, 6PHkO0E4O3E, syiXQH6LNI8).",
-  "High-performing videos almost universally feature custom thumbnails that create visual curiosity and contrast on the Shorts feed.",
-  "Geo-political, national identity, and comparative power topics ('Powerful countries', 'Highest-earning cities', 'India vs others') drive massive organic discovery and sustained views per day.",
-  "Shorter durations ranging between 30 to 50 seconds maintain stronger engagement, aligning with the channel's top performers.",
-  "Strong inquisitive hooks in titles directly addressing the viewer or posing a direct question ('भारत किस नंबर पर है?', 'क्या UK टूटने वाला है?') yield high initial engagement."
+  "Geopolitical power rankings & Indian pride: Top 4 videos (3.5k, 3.4k, 2.6k, 2.3k views) all focus on Indian cities, military power, borders, or the 1962 war.",
+  "Bilingual / Hindi titles with intense emojis: Videos with flags (🇮🇳, 🇨🇳), shock faces (😱, 😲), and bold comparison framing ('कौन असली बादशाह?') consistently breach 1.5k+ views.",
+  "Early morning publishing window: 7 of the top 10 videos were published between 6:00 AM and 9:00 AM IST.",
+  "Custom thumbnails: 9 out of top 10 videos utilized custom thumbnails, whereas 9 of the bottom 11 had no custom thumbnails (has_custom_thumbnail: false)."
  ],
  "diagnosis": {
-  "hook": "The channel struggles when titles are purely descriptive or in English ('Photosynthesis Explained', 'The Incredible Power of the Mantis Shrimp') rather than posing an urgent, curiosity-driven question in Hindi with emotional punctuation.",
-  "buildup": "Low-performing videos suffer from slow academic pacing or obscure foreign history topics that fail to bridge the gap between the initial hook and viewer retention within the first 15 seconds.",
-  "visuals": "There is a direct correlation between missing custom thumbnails and near-zero views; top videos rely heavily on high-contrast custom thumbnails to stop the scroll.",
-  "titles_topics": "English-only scientific or foreign history topics underperform significantly compared to geopolitics, national pride, Indian history milestones, and high-impact economic/city facts packaged in Hindi.",
-  "other": "Newly published videos naturally have low views due to age, but lack of metadata (descriptions and tags) in poorer performers further starves them of algorithm testing."
+  "hook": "Underperforming scripts rely on slow, rhetorical essay questions (e.g., 'Do you know how...', 'Can just 78 people alone shake...'). Top videos grab curiosity immediately with concrete stakes, rankings, or intense contrasts in the first second.",
+  "buildup": "Weak scripts read like Wikipedia timelines, dumping monarch names, dates, and locations (e.g., Araiyan, Sakkarakkottam, Dandabhukti) without establishing a clear protagonist vs antagonist tension or a sensory challenge.",
+  "visuals": "Script tags show generic, mismatched uniform/visual assets (e.g., 'indian', 'mongol' applied to Pavan Khind, a Maratha-Bijapur clash). Lack of curated custom thumbnails on 9/11 weak videos signals visual neglect before the viewer even clicks.",
+  "titles_topics": "Total disconnect between channel strengths and weak videos. TruFact succeeds on Indian defense, geopolitics, and shocking historical clashes. It fails miserably (<100 views) on generic school science ('Photosynthesis Explained'), random biology ('Mantis Shrimp'), and dry English titles without emojis.",
+  "other": "Upload discipline slipped: titles containing copy-paste artifacts ('Description:'), unoptimized empty metadata (0 tags, 0 description chars), and inconsistent publishing hours (switching from 6-9 AM IST to mid-day or late night)."
  },
  "playbook": {
   "hook_rules": [
-   "Always start the title and first audio beat with a direct, high-stakes question or shocking paradox.",
-   "Use power words in Hindi such as 'कौन', 'कैसा', 'क्या', and 'सच' to command immediate attention.",
-   "Keep the spoken hook under 5 seconds, avoiding slow introductions or channel branding at the start.",
-   "Incorporate local or national relevance immediately so the target audience feels personally addressed.",
-   "Avoid dry textbook definitions as opening lines; replace them with dramatic stakes or mysteries."
+   "Never start with a polite question like 'Did you know?' or 'Can someone...'; start with an alarming statement or instant conflict.",
+   "Front-load the familiar entity in the first 2 seconds (say 'Mahatma Gandhi' or 'Chhatrapati Shivaji Maharaj' immediately instead of vague pronouns).",
+   "Use numbers or extreme contrast in line 1 (e.g., '300 soldiers against 10,000' rather than 'a massive army').",
+   "Deliver the first visual shock cut within 1.5 seconds to prevent feed swiping.",
+   "State the stakes upfront: tell the viewer exactly what happens if the hero fails."
   ],
   "buildup_rules": [
-   "Structure the middle beats as a rapid escalation of stakes or mounting tension rather than a flat list of facts.",
-   "Keep total video length strictly between 35 to 50 seconds to maintain optimal completion rates.",
-   "Introduce a micro-conflict or turning point every 10 to 12 seconds to prevent viewer drop-off.",
-   "Ensure the narrative flow directly resolves the central question posed in the hook just before the call-to-action."
+   "Limit named historical figures and places to maximum 2 key entities per Short to prevent cognitive overload.",
+   "Adopt the 'But / Therefore' story engine: hero attempts action -> BUT faced catastrophic obstacle -> THEREFORE took an insane gamble.",
+   "Inject sensory storytelling beats ('mud, blood, gunfire, 40-degree heat') instead of dry calendar dates.",
+   "Keep the climax payoff in the final 5 seconds to hold retention until the final loop."
   ],
   "visual_rules": [
-   "Mandatory custom thumbnail for every single Short featuring expressive faces, high contrast, and bold text.",
-   "Use dynamic text overlays matching the spoken audio to retain muted scrollers.",
-   "Incorporate fast-paced visual transitions, map zooms, or archival imagery changes every 2 to 3 seconds.",
-   "Maintain bright color grading and avoid dark, muddy visual compositions that look unappealing on mobile screens."
+   "Always upload a high-contrast custom thumbnail featuring faces, flags, or high-saturation battle art.",
+   "Ensure visual assets match historical accuracy (do not use generic Mongol assets for Maratha or Chola history).",
+   "Use bold 2-to-3 word kinetic captions centered on screen with highlighted yellow/red keywords.",
+   "Change camera angle or visual B-roll every 1.8 to 2.5 seconds to match Shorts pacing."
   ],
   "title_rules": [
-   "Adopt a bilingual or pure Hindi title strategy utilizing high-urgency emojis like 😱, 😲, and 🔥.",
-   "Frame titles around curiosity gaps or direct challenges ('क्या भारत...?', 'कौन जीतेगा...?') instead of neutral statements.",
-   "Keep titles concise and optimized for mobile screens so the entire hook is visible without truncation.",
-   "Leverage trending national, economic, or geopolitical keywords that align with TruFact's proven audience interests."
+   "Use Hindi or Hinglish for Indian history and geopolitics; avoid pure academic English titles.",
+   "Incorporate 1-2 emotive emojis (🇮🇳, 😱, 🔥, ⚔️) to increase visual weight in the feed.",
+   "Formulate curiosity gaps around power or conflict ('कैसे जीता?', 'किस नंबर पर है?', 'The War Over...').",
+   "Proofread strictly to eliminate copy-paste artifacts like 'Description:' or broken tags."
   ],
   "topic_rules": [
-   "Prioritize geopolitics, national security, major economic comparisons, and dramatic untold Indian historical events.",
-   "Avoid oversaturated, generic animal facts or basic school science topics unless given a radical, dark, or unknown twist.",
-   "Test audience reception on high-performing themes by iterating on formats that previously crossed the 1,500-view threshold."
+   "Stick strictly to channel sweet spots: Indian Geopolitics, Military Defense/Wars, Indian Pride/History, and Bizarre True Scandals.",
+   "Drop school-curriculum science and generic biology (e.g., Photosynthesis, Mantis Shrimp) entirely.",
+   "Anchor global conflicts to India's perspective (e.g., compare foreign strength against India or frame how it impacts India)."
   ],
   "avoid": [
-   "Publishing Shorts without a custom thumbnail."
+   "Publishing videos without custom thumbnails.",
+   "Textbook titles that sound like school homework or Wikipedia page titles.",
+   "Listing multiple complex ancient dynasty names within a 45-second script.",
+   "Relying on English titles for topics targeted at domestic Hindi viewers.",
+   "Uploading during off-peak afternoon hours (12 PM - 4 PM IST); keep to 6:00 AM - 9:00 AM IST."
   ]
  }
 }

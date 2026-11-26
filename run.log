@@ -1,139 +1,60 @@
-CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 77 | total views: 33936 | video count: 34 | PUBLIC VIDEOS (older than 1 day), BEST FIRST: [{"id": "6PHkO0E4O3E", "title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "hour_ist": 7, "age_days": 55.2, "views": 3516, "views_per_day": 63.7, "likes": 72, "like_pct": 2.0, "comments": 2, "seconds": 51, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 7, "tags": 1}, {"id": "kAJSO4Uy3ZE", "title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "hour_ist": 6, "age_days": 73.2, "views": 3398, "views_per_day": 46.4, "likes": 66, "like_pct": 1.9, "comments": 6, "seconds": 48, "privacy": "public", "title_language": "hindi", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 536, "tags": 3}, {"id": "DGmkCb5DUOU", "title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "hour_ist": 9, "age_days": 61.1, "views": 2617, "views_per_day": 42.8, "likes": 36, "like_pct": 1.4, "comments": 3, "seconds": 29, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 149, "tags": 1}, {"id": "NHpSHgXmrCg", "title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "hour_ist": 8, "age_days": 64.1, "views": 2314, "views_per_day": 36.1, "likes": 58, "like_pct": 2.5, "comments": 3, "seconds": 32, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 0, "tags": 0}, {"id": "syiXQH6LNI8", "title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "hour_ist": 8, "age_days": 68.2, "views": 1570, "views_per_day": 23.0, "likes": 41, "like_pct": 2.6, "comments": 2, "seconds": 36, "privacy": "pub
-  [gemini-flash-latest] HTTP 503: {
-  "error": {
-    "code": 503,
-    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
-    "status": "UNAVAILABLE"
-  }
-}
-
-  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-COACH DIAGNOSIS: {"hook": "Top videos use 'Top 5', 'Highest', or 'Mystery' to create immediate curiosity. Weak videos use labels like 'Explained' or specific names like 'Mantis Shrimp' which don't trigger a 'must-watch' response.", "buildup": "Data suggests videos around 45-50 seconds perform well if they are rankings, but historical narratives (like the Chola or British Raj videos) are currently struggling to gain initial velocity.", "visuals": "There is a 100% correlation between the bottom 5 videos and a lack of custom thumbnails. Visual packaging is the primary bottleneck for these videos.", "titles_topics": "The audience responds to 'National Pride' and 'Global Power' topics. Moving into niche biology or ancient history without an India-link causes a sharp drop in views.", "other": "The channel median is 1092; videos under 100 views are often those that fail to bridge the gap between 'Fact' and 'Entertainment'."}
-COACH WEAK: [{"title": "78 लोग और ब्रिटिश साम्राज्य की हार? 😱", "views": 7, "likely_reasons": ["Extremely low age (2.2 days) suggests it hasn't hit the Shorts feed yet", "Lack of custom thumbnail compared to top-performing videos", "Topic might be too niche/historical for a broad audience"]}, {"title": "CHOLA EMPIRE ने गंगा को कैसे जीता? 🚩", "views": 20, "likely_reasons": ["Low age (3.2 days)", "Lack of custom thumbnail", "Historical military topics show significantly lower initial traction than 'Top 5' rankings"]}, {"title": "The Incredible Power of the Mantis Shrimp", "views": 24, "likely_reasons": ["English title on a predominantly Hindi-interest channel", "No emojis in title to grab attention", "Niche nature topic lacks the 'India-centric' appeal of the channel's hits"]}, {"title": "Photosynthesis Explained #shorts", "views": 28, "likely_reasons": ["Educational/Academic title lacks a curiosity g
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-candidate reply: {   "niche": "Indian Historical Expeditions & Escapes",   "audience": "Patriotic Hindi-speaking youth and history enthusiasts interested in military strategy and survival.",   "why": "The channel thrives on 'India vs World' and 'Hidden History' themes. Stories about famous Indian rulers like Shivaji
-  strategist says: niche= Indian Historical Expeditions & Escapes | audience= Patriotic Hindi-speaking youth and history enthusiasts interested in military strategy and survival. | why= The channel thrives on 'India vs World' and 'Hidden History' themes. Stories about famous Indian rulers like Shivaji, Bajirao, and the Cholas performing impossible geographical feats (speed, distance, or naval routes) create high retention and curiosity gaps that fit the current audience growth pattern.
-  candidate 'Escape of Shivaji from Agra' -> 'Escape of Shivaji from Agra', 0 chars
+CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 77 | total views: 33958 | video count: 35 | PUBLIC VIDEOS (older than 1 day), BEST FIRST: [{"id": "6PHkO0E4O3E", "title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "hour_ist": 7, "age_days": 55.9, "views": 3516, "views_per_day": 62.9, "likes": 72, "like_pct": 2.0, "comments": 2, "seconds": 51, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 7, "tags": 1}, {"id": "kAJSO4Uy3ZE", "title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "hour_ist": 6, "age_days": 73.9, "views": 3409, "views_per_day": 46.1, "likes": 67, "like_pct": 2.0, "comments": 6, "seconds": 48, "privacy": "public", "title_language": "hindi", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 536, "tags": 3}, {"id": "DGmkCb5DUOU", "title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "hour_ist": 9, "age_days": 61.8, "views": 2617, "views_per_day": 42.4, "likes": 36, "like_pct": 1.4, "comments": 3, "seconds": 29, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 149, "tags": 1}, {"id": "NHpSHgXmrCg", "title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "hour_ist": 8, "age_days": 64.8, "views": 2314, "views_per_day": 35.7, "likes": 58, "like_pct": 2.5, "comments": 3, "seconds": 32, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 0, "tags": 0}, {"id": "syiXQH6LNI8", "title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "hour_ist": 8, "age_days": 68.8, "views": 1570, "views_per_day": 22.8, "likes": 41, "like_pct": 2.6, "comments": 2, "seconds": 36, "privacy": "pub
+COACH DIAGNOSIS: {"hook": "Underperforming scripts rely on slow, rhetorical essay questions (e.g., 'Do you know how...', 'Can just 78 people alone shake...'). Top videos grab curiosity immediately with concrete stakes, rankings, or intense contrasts in the first second.", "buildup": "Weak scripts read like Wikipedia timelines, dumping monarch names, dates, and locations (e.g., Araiyan, Sakkarakkottam, Dandabhukti) without establishing a clear protagonist vs antagonist tension or a sensory challenge.", "visuals": "Script tags show generic, mismatched uniform/visual assets (e.g., 'indian', 'mongol' applied to Pavan Khind, a Maratha-Bijapur clash). Lack of curated custom thumbnails on 9/11 weak videos signals visual neglect before the viewer even clicks.", "titles_topics": "Total disconnect between channel strengths and weak videos. TruFact succeeds on Indian defense, geopolitics, and shocking historical clashes. It fails miserably (<100 views) on generic school science ('Photosynthesis Explained'), random biology ('Mantis Shrimp'), and dry English titles without emojis.", "other": "Upload discipline slipped: titles containing copy-paste artifacts ('Description:'), unoptimized empty metadata (0 tags, 0 description chars), and inconsistent publishing hours (switching from 6-9 AM IST to mid-day or late night)."}
+COACH WEAK: [{"title": "78 लोग और ब्रिटिश साम्राज्य की हार? 😱", "views": 7, "likely_reasons": ["Script hook relies on a slow rhetorical question ('Can just 78 people alone...') instead of naming Mahatma Gandhi or the Dandi March upfront.", "Very low account age (2.9 days) means algorithm testing may still be early, but opening velocity is sluggish.", "Missing a custom thumbnail (has_custom_thumbnail: false) weakens browse/channel page click-through."]}, {"title": "How Sacred Cats Won an Ancient Battle", "views": 13, "likely_reasons": ["Title is purely in English with no emojis, alienating the channel's core Hindi-speaking audience.", "Obscure niche topic with weak cultural relevance to the Indian Shorts demographic.", "No custom thumbnail attached."]}, {"title": "The Impossible Sea Battle of Myeongnyang", "views": 21, "likely_reasons": ["Obscure Korean naval battle with zero name recognition in Hind
+candidate reply: {   "niche": "Indian Historical Military Expeditions & Journeys",   "audience": "Hindi-speaking youth and general knowledge enthusiasts interested in Indian military pride, legendary rulers, and dramatic historical strategies",   "why": "Stories of legendary Indian warriors pulling off audacious, hi
+  strategist says: niche= Indian Historical Military Expeditions & Journeys | audience= Hindi-speaking youth and general knowledge enthusiasts interested in Indian military pride, legendary rulers, and dramatic historical strategies | why= Stories of legendary Indian warriors pulling off audacious, high-speed marches across real geography consistently outperform generic trivia on this channel. Baji Rao I's legendary 1737 lightning strike on Delhi features a high-stakes route, an iconic historical hero familiar to Indian youth, extreme speed metrics (500 km in 48 hours), and an instant conflict hook that drives retention.
   candidate 'Battle of Delhi (1737)' -> 'Battle of Delhi (1737)', 0 chars
-  candidate 'Grand Trunk Road' -> 'Grand Trunk Road', 7218 chars
-topic: Grand Trunk Road | extract chars: 7218
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-  [gemini-3-flash-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-3-flash-preview unavailable, trying next
-TITLE: Grand Trunk Road Ka Sach? 😱
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  speech 38.8s, total video 44.7s
-done 335 frames, 1.65 s/frame
-done 336 frames, 1.65 s/frame
-done 336 frames, 1.66 s/frame
-done 335 frames, 1.66 s/frame
-  atlas frames pass 1: exit [0, 0, 0, 0], 1342/1342, 558s
+  candidate 'Nain Singh Rawat' -> 'Nain Singh', 8522 chars
+topic: Nain Singh | extract chars: 8522
+  [gemini-flash-latest] network error: HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=120)
+TITLE: 31 लाख कदमों से तिब्बत को कैसे नापा? 😱
+  speech 44.0s, total video 47.2s
+done 354 frames, 2.20 s/frame
+done 354 frames, 2.20 s/frame
+done 354 frames, 2.21 s/frame
+done 355 frames, 2.21 s/frame
+  atlas frames pass 1: exit [0, 0, 0, 0], 1417/1417, 785s
 fx written
 rendered out/short.mp4
-https://github.com/r72556575-oss/trufact-asset/releases/tag/daily-20261126-0636
-video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261126-0636/short.mp4 | publishAt 2026-11-27T01:30:00Z
+https://github.com/r72556575-oss/trufact-asset/releases/tag/daily-20261126-2246
+video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261126-2246/short.mp4 | publishAt 2026-11-27T01:30:00Z
   zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
-  upload attempt 1 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  upload try 1 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 180 s before upload try 2
   zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
-  upload attempt 2 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  upload try 2 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 420 s before upload try 3
   zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
-  upload attempt 3 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  upload try 3 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 900 s before upload try 4
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  upload try 4 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 1500 s before upload try 5
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  upload try 5 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
 Traceback (most recent call last):
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 483, in <module>
-    main()
+  File "/home/runner/work/trufact-asset/trufact-asset/run_daily.py", line 90, in <module>
+    generate.main()
   File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 475, in main
     res = publish(os.path.join(OUT, "short.mp4"), script)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 435, in publish
-    raise RuntimeError("YouTube upload failed after 3 tries")
-RuntimeError: YouTube upload failed after 3 tries
+  File "/home/runner/work/trufact-asset/trufact-asset/run_daily.py", line 86, in publish
+    raise RuntimeError("YouTube upload failed after %d tries: %s" % (len(WAITS), last))
+RuntimeError: YouTube upload failed after 5 tries: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
 attempt 1 failed, retrying in 120 s
-CHANNEL PROFILE: CHANNEL: TruFact | TARGET 1 🎯 1K SUBSCRIBE  | TARGET 2 🎯 50K SUBSCRIBE | TARGET 3 🎯 100K SUBSCRIBE ‼️ | ____________________________________ |  |  | Can you guys complete this target? 🎯 |  | keywords: TruFact "Tru Fact" facts "amazing facts" "interesting facts" "Hindi facts" "facts in Hindi" knowledge "amazing knowledge" "general knowledge" "science facts" "mystery facts" "history facts" "world facts" "India facts" FactoHolic FactTechz "Fact Side" FactoMatic "FACT EDUCATION" "Facts' Mine" "The Fact" "Facts World" "Mr Unknown Facts" "Mr FactCity" "unknown facts" "viral facts" "short facts" "facts shorts" "Hindi facts shorts" | subscribers: 77 | total views: 33936 | video count: 34 | PUBLIC VIDEOS (older than 1 day), BEST FIRST: [{"id": "6PHkO0E4O3E", "title": "India's Highest-Earning Cities 😲 #shorts", "published": "2026-10-02", "hour_ist": 7, "age_days": 55.2, "views": 3516, "views_per_day": 63.7, "likes": 72, "like_pct": 2.0, "comments": 2, "seconds": 51, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 7, "tags": 1}, {"id": "kAJSO4Uy3ZE", "title": "🌍 दुनिया के Top 5 सबसे Powerful देश! 😱 भारत किस नंबर पर है? 🇮🇳🔥 @TruFact-k6h", "published": "2026-09-14", "hour_ist": 6, "age_days": 73.2, "views": 3398, "views_per_day": 46.4, "likes": 66, "like_pct": 1.9, "comments": 6, "seconds": 48, "privacy": "public", "title_language": "hindi", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 536, "tags": 3}, {"id": "DGmkCb5DUOU", "title": "Mystery of the 1962 War 🇮🇳🌑", "published": "2026-09-26", "hour_ist": 9, "age_days": 61.1, "views": 2617, "views_per_day": 42.8, "likes": 36, "like_pct": 1.4, "comments": 3, "seconds": 29, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 149, "tags": 1}, {"id": "NHpSHgXmrCg", "title": "🇮🇳🌊 India’s Maritime Boundary@TruFact-k6h", "published": "2026-09-23", "hour_ist": 8, "age_days": 64.2, "views": 2314, "views_per_day": 36.1, "likes": 58, "like_pct": 2.5, "comments": 3, "seconds": 32, "privacy": "public", "title_language": "english", "has_emoji": true, "has_custom_thumbnail": true, "description_chars": 0, "tags": 0}, {"id": "syiXQH6LNI8", "title": "🇬🇧 क्या UK टूटने वाला है? 😱 Scotland और Northern Ireland का क्या होगा? 🌍", "published": "2026-09-19", "hour_ist": 8, "age_days": 68.2, "views": 1570, "views_per_day": 23.0, "likes": 41, "like_pct": 2.6, "comments": 2, "seconds": 36, "privacy": "pub
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-  [gemini-3-flash-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-3-flash-preview unavailable, trying next
-COACH DIAGNOSIS: {"hook": "The channel struggles when titles are purely descriptive or in English ('Photosynthesis Explained', 'The Incredible Power of the Mantis Shrimp') rather than posing an urgent, curiosity-driven question in Hindi with emotional punctuation.", "buildup": "Low-performing videos suffer from slow academic pacing or obscure foreign history topics that fail to bridge the gap between the initial hook and viewer retention within the first 15 seconds.", "visuals": "There is a direct correlation between missing custom thumbnails and near-zero views; top videos rely heavily on high-contrast custom thumbnails to stop the scroll.", "titles_topics": "English-only scientific or foreign history topics underperform significantly compared to geopolitics, national pride, Indian history milestones, and high-impact economic/city facts packaged in Hindi.", "other": "Newly published videos naturally have low views due to age, but lack of metadata (descriptions and tags) in poorer performers further starves them of algorithm testing."}
-COACH WEAK: [{"title": "YzmwjyXf7lM", "views": 7, "likely_reasons": ["Extremely low distribution and new upload age (2.2 days), meaning YouTube's algorithm hasn't pushed it yet or tested it with a tiny seed audience.", "Lack of custom thumbnail limits initial click-through rate (CTR) on the Shorts feed shelf.", "Generic historical framing that fails to instantly capture a broad audience within the first 1-2 seconds of discovery."]}, {"title": "0IET1S3K5SQ", "views": 20, "likely_reasons": ["Very low view count due to being newly published (3.2 days) with limited initial algorithmic momentum.", "Missing custom thumbnail leads to a drop in feed CTR compared to top-performing hits.", "Niche historical topic (Chola Empire) might have a narrower immediate appeal on a general facts channel compared to broader contemporary or high-impact geographic topics."]}, {"title": "07nfHq4q5zc", "views": 20, "likely_r
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-candidate reply: {   "niche": "Untold Historical Routes & Epic Marches",   "audience": "Hindi-speaking youth interested in Indian military history, tactical genius, and dramatic escapes.",   "why": "Indian historical events involving geography (routes, escapes, and speed-marches) provide a visual map-based narrative
-  strategist says: niche= Untold Historical Routes & Epic Marches | audience= Hindi-speaking youth interested in Indian military history, tactical genius, and dramatic escapes. | why= Indian historical events involving geography (routes, escapes, and speed-marches) provide a visual map-based narrative that is highly engaging for Shorts. Using famous figures like Shivaji and Netaji ensures high CTR through familiarity while the 'route' aspect provides a fresh educational angle.
-  candidate "Shivaji's escape from Agra" -> "Shivaji's escape from Agra", 0 chars
-  candidate "Subhas Chandra Bose's escape from India" -> "Subhas Chandra Bose's escape from India", 0 chars
-  candidate 'Battle of Delhi (1737)' -> 'Battle of Delhi (1737)', 0 chars
-  candidate 'Siege of Jhansi' -> 'Siege of Jhansi', 5308 chars
-topic: Siege of Jhansi | extract chars: 5308
-  [gemini-flash-latest] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  text model gemini-flash-latest unavailable, trying next
-TITLE: क्या अकेली रानी अंग्रेजों को हरा पाएगी? ⚔️
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  [gemini-3.1-flash-tts-preview] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-3.1-flash-tts-preview failed: Gemini call failed: gemini-3.1-flash-tts-preview
-  [gemini-2.5-flash-preview-tts] HTTP 429: {
-  "error": {
-    "code": 429,
-    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceede
-  TTS model gemini-2.5-flash-preview-tts failed: Gemini call failed: gemini-2.5-flash-preview-tts
-Traceback (most recent call last):
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 483, in <module>
-    main()
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 446, in main
-    segs = build_voice(beats)
-           ^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 361, in build_voice
-    x = trim(tts(a["hindi"] + " " + b["hindi"]))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trufact-asset/trufact-asset/generate.py", line 326, in tts
-    raise RuntimeError("TTS failed on all models")
-RuntimeError: TTS failed on all models
-attempt 2 failed, retrying in 120 s
+resume: using the script from the earlier attempt
+TITLE: 31 लाख कदमों से तिब्बत को कैसे नापा? 😱
+resume: using the voice from the earlier attempt
+  speech 44.0s, total video 47.2s
+resume: video already rendered
+rendered out/short.mp4
+video url: https://github.com/r72556575-oss/trufact-asset/releases/download/daily-20261126-2246/short.mp4 | publishAt 2026-11-27T01:30:00Z
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  upload try 1 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 180 s before upload try 2
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  upload try 2 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 420 s before upload try 3
+  zapier tools: ['discover_zapier_actions', 'enable_zapier_action', 'disable_zapier_action', 'inspect_zapier_actions', 'execute_zapier_read_action', 'execute_zapier_write_action'] ...
+  upload try 3 failed: {"isError":true,"error":"('This action has been throttled without retry.', None)"}
+  waiting 900 s before upload try 4
