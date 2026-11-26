@@ -91,7 +91,7 @@ def render_video(story, web_dir, work, voice_wav, out_mp4, procs=3, quality="0.9
         log(f"  atlas frames pass {attempt + 1}: exit {codes}, {have}/{total}, {time.time() - t0:.0f}s")
         if have >= total: break
     else: raise RuntimeError(f"atlas render incomplete: {have}/{total}")
-    fx = os.path.join(work, "fx.raw"); subprocess.run(["node", "atlas_render.mjs", "fx", fx], cwd=node_dir, env=dict(os.environ, **env), check=True)
+    fx = os.path.abspath(os.path.join(work, "fx.raw")); subprocess.run(["node", "atlas_render.mjs", "fx", fx], cwd=node_dir, env=dict(os.environ, **env), check=True)
     raw = np.fromfile(fx, dtype="<i2").astype(np.float32) / 32768.0; fxw = os.path.join(work, "fx.wav")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", fx, fxw], check=True)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", os.path.join(frames, "f%04d.jpg"), "-i", voice_wav, "-i", fxw,
